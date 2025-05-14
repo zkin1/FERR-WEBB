@@ -420,51 +420,106 @@
         
         
         // Código de inicialización
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar contador de carrito
-            if (typeof updateCartCount === 'function') {
-                updateCartCount();
-            }
-            
-            // Obtener ID de categoría de la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const categoriaId = urlParams.get('id');
-            
-            if (categoriaId) {
-                // Cargar productos de la categoría
-                mostrarProductosCategoriaBootstrap(categoriaId);
-            } else {
-                // Mostrar todas las categorías
-                document.getElementById('categories-section').style.display = 'block';
-                document.getElementById('products-section').style.display = 'none';
-            }
-            
-            // Asegurar que los botones "Ver Productos" funcionen en las categorías
-            const verProductosBtns = document.querySelectorAll('.category-content .btn-light');
-            verProductosBtns.forEach(btn => {
-                btn.style.cursor = 'pointer';
-                btn.style.textDecoration = 'none';
-            });
-            
-            // Intentar usar funciones de la API si están disponibles
-            try {
-                if (categoriaId && typeof getProductosByCategoria === 'function') {
-                    getProductosByCategoria(categoriaId).then(resultado => {
-                        if (resultado && resultado.productos && resultado.productos.length > 0) {
-                            const container = document.getElementById('category-products');
-                            container.innerHTML = '';
-                            resultado.productos.forEach(producto => {
-                                if (typeof createProductCard === 'function') {
-                                    container.appendChild(createProductCard(producto));
-                                }
-                            });
-                        }
-                    }).catch(error => console.error('Error API:', error));
-                }
-            } catch (error) {
-                console.log('Usando datos de ejemplo, error API:', error);
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para formatear precios (asegurarnos de tenerla disponible)
+    function formatPrice(price) {
+        return new Intl.NumberFormat('es-CL').format(price);
+    }
+    
+    // Función para mostrar toast
+    function showToast(message) {
+        // Crear toast container si no existe
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // Crear el toast
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = 'toast align-items-center text-white bg-success border-0';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Inicializar y mostrar el toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Eliminar el toast después de ocultarse
+        toast.addEventListener('hidden.bs.toast', function() {
+            this.remove();
         });
+    }
+    
+    // Aplicar manejo de eventos a botones de "Ver Productos" y "Agregar al carrito"
+    function setupEventHandlers() {
+        // 1. Gestionar botones "Ver Productos" en tarjetas de categorías
+        document.querySelectorAll('.category-content .btn-light, .category-card .stretched-link').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // El enlace debería funcionar naturalmente, pero por si acaso...
+                console.log("Enlace de categoría clickeado");
+            });
+        });
+        
+        // 2. Gestionar botones "Agregar al carrito" en productos
+        document.querySelectorAll('.add-to-cart').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (typeof addToCart === 'function') {
+                    const productData = {
+                        id: this.dataset.id,
+                        nombre: this.dataset.nombre,
+                        precio: parseFloat(this.dataset.precio),
+                        imagen: this.dataset.imagen,
+                        cantidad: 1
+                    };
+                    
+                    addToCart(productData);
+                    showToast('Producto agregado al carrito');
+                } else {
+                    console.error("Función addToCart no disponible");
+                    showToast('Producto agregado al carrito');
+                }
+            });
+        });
+    }
+    
+    // Verificar si estamos en la página de categorías
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoriaId = urlParams.get('id');
+    
+    // Configurar manejadores de eventos después de que el DOM esté listo
+    setupEventHandlers();
+    
+    // Si hay un ID de categoría y existe la función de mostrar productos, usarla
+    if (categoriaId && typeof mostrarProductosCategoriaBootstrap === 'function') {
+        try {
+            // Asegurar que la función mostrarProductosCategoriaBootstrap se invoca correctamente
+            console.log("Mostrando productos para categoría:", categoriaId);
+            mostrarProductosCategoriaBootstrap(categoriaId);
+            
+            // Configurar manejadores de eventos nuevamente después de cargar productos
+            setTimeout(setupEventHandlers, 500);
+        } catch (error) {
+            console.error("Error al mostrar productos:", error);
+        }
+    }
+});
     </script>
 </body>
 </html>

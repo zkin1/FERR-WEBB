@@ -9,13 +9,13 @@ function createCategoryUrl(categoriaId) {
     }
 }
 
-// Función para mostrar categorías
 // Función para mostrar categorías con Bootstrap mejorado
 async function mostrarCategoriasBootstrap() {
     const container = document.getElementById('categories-container');
     if (!container) return;
     
     try {
+        console.log('Intentando obtener categorías de la API...');
         // Intentar obtener categorías de la API
         const response = await fetch('http://localhost:3000/api/categorias');
         
@@ -24,6 +24,7 @@ async function mostrarCategoriasBootstrap() {
         }
         
         const categorias = await response.json();
+        console.log('Categorías obtenidas:', categorias);
         
         // Limpiar el contenedor
         container.innerHTML = '';
@@ -55,6 +56,9 @@ async function mostrarCategoriasBootstrap() {
             const gradient = gradients[index % gradients.length];
             const icon = icons[index % icons.length];
             
+            // Crear la URL de la categoría - IMPORTANTE
+            const categoriaUrl = createCategoryUrl(categoria.id);
+            
             col.innerHTML = `
                 <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
                     <div class="position-relative">
@@ -66,10 +70,9 @@ async function mostrarCategoriasBootstrap() {
                             <h3 class="h4 mb-2">${categoria.nombre}</h3>
                             <p class="mb-0 opacity-75">Encuentra los mejores productos</p>
                             <div class="mt-3">
-                                <span class="btn btn-sm btn-light">Ver Productos <i class="fas fa-chevron-right ms-1"></i></span>
+                                <a href="${categoriaUrl}" class="btn btn-sm btn-light">Ver Productos <i class="fas fa-chevron-right ms-1"></i></a>
                             </div>
                         </div>
-                        <a href="${createCategoryUrl(categoria.id)}" class="stretched-link"></a>
                     </div>
                 </div>
             `;
@@ -89,13 +92,11 @@ function mostrarCategoriasDeMuestraBootstrap() {
     const container = document.getElementById('categories-container');
     if (!container) return;
     
-    // Categorías de ejemplo
+    // Categorías de ejemplo - ACTUALIZADAS PARA COINCIDIR CON LA API
     const categorias = [
         { id: 1, nombre: 'Herramientas', color: 'rgba(0, 102, 204, 0.8)' },
-        { id: 2, nombre: 'Materiales', color: 'rgba(0, 153, 51, 0.8)' },
-        { id: 3, nombre: 'Electricidad', color: 'rgba(204, 51, 0, 0.8)' },
-        { id: 4, nombre: 'Plomería', color: 'rgba(102, 0, 204, 0.8)' },
-        { id: 5, nombre: 'Ferretería General', color: 'rgba(204, 153, 0, 0.8)' }
+        { id: 4, nombre: 'Herramientas Manuales', color: 'rgba(0, 153, 51, 0.8)' },
+        { id: 5, nombre: 'Herramientas Eléctricas', color: 'rgba(204, 51, 0, 0.8)' }
     ];
     
     // Limpiar el contenedor
@@ -106,14 +107,21 @@ function mostrarCategoriasDeMuestraBootstrap() {
         const col = document.createElement('div');
         col.className = 'col';
         
+        // Crear la URL
+        const categoriaUrl = createCategoryUrl(categoria.id);
+        
         col.innerHTML = `
-            <a href="${createCategoryUrl(categoria.id)}" class="text-decoration-none">
-                <div class="category-card shadow" style="background-color: ${categoria.color};">
-                    <div class="category-overlay">
-                        <h3 class="category-name">${categoria.nombre}</h3>
+            <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                <div class="position-relative" style="background-color: ${categoria.color};">
+                    <div class="category-content p-4 text-white">
+                        <h3 class="h4 mb-2">${categoria.nombre}</h3>
+                        <p class="mb-0 opacity-75">Encuentra los mejores productos</p>
+                        <div class="mt-3">
+                            <a href="${categoriaUrl}" class="btn btn-sm btn-light">Ver Productos <i class="fas fa-chevron-right ms-1"></i></a>
+                        </div>
                     </div>
                 </div>
-            </a>
+            </div>
         `;
         
         container.appendChild(col);
@@ -121,7 +129,7 @@ function mostrarCategoriasDeMuestraBootstrap() {
 }
 
 // Función para mostrar productos de una categoría
-function mostrarProductosCategoriaBootstrap(categoriaId) {
+async function mostrarProductosCategoriaBootstrap(categoriaId) {
     console.log("Mostrando productos para categoría ID:", categoriaId);
     
     const container = document.getElementById('category-products');
@@ -142,13 +150,23 @@ function mostrarProductosCategoriaBootstrap(categoriaId) {
     }
     
     try {
-        // Datos de ejemplo (puedes reemplazar con tu API real)
+        // Intentamos obtener los productos desde la API
+        console.log('Intentando obtener productos de la API para categoría:', categoriaId);
+        // URL REAL para obtener productos de una categoría
+        const response = await fetch(`http://localhost:3000/api/categorias/${categoriaId}/productos`);
+        
+        if (!response.ok) {
+            throw new Error(`Error obteniendo productos: ${response.status}`);
+        }
+        
+        const resultado = await response.json();
+        console.log('Productos obtenidos:', resultado);
+        
+        // Datos para mapear los nombres de categoría
         const categoriasNombres = {
             '1': 'Herramientas',
-            '2': 'Herramientas Manuales',
-            '3': 'Herramientas Eléctricas',
-            '4': 'Materiales de Construcción',
-            '5': 'Ferretería General'
+            '4': 'Herramientas Manuales',
+            '5': 'Herramientas Eléctricas'
         };
         
         // Actualizar título y breadcrumb
@@ -160,24 +178,14 @@ function mostrarProductosCategoriaBootstrap(categoriaId) {
         if (categoryTitleElem) categoryTitleElem.textContent = `Productos de ${nombreCategoria}`;
         if (categoryNameElem) categoryNameElem.textContent = nombreCategoria;
         
-        // Datos de ejemplo para productos (reemplazar con tu API)
-        const productos = [
-            { id: 1, nombre: 'Martillo Profesional', codigo: 'MART001', precio: 12990, categoria_id: 1 },
-            { id: 2, nombre: 'Destornillador Eléctrico', codigo: 'DEST001', precio: 19990, categoria_id: 2 },
-            { id: 3, nombre: 'Sierra Circular', codigo: 'SIER001', precio: 89990, categoria_id: 3 },
-            { id: 4, nombre: 'Cemento 25kg', codigo: 'CEM001', precio: 5990, categoria_id: 4 },
-            { id: 5, nombre: 'Clavos 1\"', codigo: 'CLAV001', precio: 1990, categoria_id: 5 }
-        ];
-        
-        // Filtrar por categoría
-        const productosFiltrados = productos.filter(p => Number(p.categoria_id) === Number(categoriaId));
-        console.log("Productos filtrados:", productosFiltrados.length);
+        // Obtenemos los productos del resultado
+        const productos = resultado.productos || resultado;
         
         // Limpiar el contenedor
         container.innerHTML = '';
         
         // Si no hay productos
-        if (productosFiltrados.length === 0) {
+        if (!productos || productos.length === 0) {
             container.innerHTML = `
                 <div class="col-12 text-center">
                     <div class="alert alert-info">
@@ -193,9 +201,12 @@ function mostrarProductosCategoriaBootstrap(categoriaId) {
         }
         
         // Mostrar productos
-        productosFiltrados.forEach(producto => {
+        productos.forEach(producto => {
             const col = document.createElement('div');
             col.className = 'col';
+            
+            // CORRECCIÓN: URL del detalle correcta
+            const productDetailUrl = `/product-detail.html?id=${producto.id}`;
             
             col.innerHTML = `
                 <div class="card h-100 shadow-sm product-card">
@@ -204,7 +215,7 @@ function mostrarProductosCategoriaBootstrap(categoriaId) {
                     </div>
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">
-                            <a href="/product-detail.html?id=${producto.id}" class="text-decoration-none">${producto.nombre}</a>
+                            <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
                         </h5>
                         <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
                         <div class="d-flex justify-content-between align-items-center mt-auto">
@@ -254,18 +265,85 @@ function mostrarProductosCategoriaBootstrap(categoriaId) {
         
     } catch (error) {
         console.error('Error al mostrar productos:', error);
+        
+        // Si la API falla, intentamos mostrar los productos de ejemplo
+        mostrarProductosEjemploPorCategoria(categoriaId, container);
+    }
+}
+
+// Función para mostrar productos de ejemplo como respaldo
+function mostrarProductosEjemploPorCategoria(categoriaId, container) {
+    // Datos de ejemplo para productos ACTUALIZADOS PARA COINCIDIR CON LA API
+    const productos = [
+        { id: 1, nombre: 'Martillo Profesional', codigo: 'HM001', precio: 15.99, categoria_id: 4 },
+        { id: 2, nombre: 'Juego de Destornilladores', codigo: 'HM002', precio: 12.50, categoria_id: 1 },
+        { id: 3, nombre: 'Alicate Universal', codigo: 'HM003', precio: 8.75, categoria_id: 1 },
+        { id: 4, nombre: 'Juego de Llaves Combinadas', codigo: 'HM004', precio: 29.99, categoria_id: 1 },
+        { id: 21, nombre: 'Taladro Percutor', codigo: 'HE001', precio: 89.99, categoria_id: 5 },
+        { id: 22, nombre: 'Sierra Circular', codigo: 'HE002', precio: 129.50, categoria_id: 5 }
+    ];
+    
+    // Filtrar por categoría
+    const productosFiltrados = productos.filter(p => Number(p.categoria_id) === Number(categoriaId));
+    console.log("Productos filtrados de ejemplo:", productosFiltrados.length);
+    
+    // Limpiar el contenedor
+    container.innerHTML = '';
+    
+    if (productosFiltrados.length === 0) {
         container.innerHTML = `
             <div class="col-12 text-center">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    Error al cargar los productos. Por favor, inténtalo nuevamente.
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay productos disponibles en esta categoría por el momento.
                 </div>
                 <a href="/pages/categorias.html" class="btn btn-primary mt-3">
                     <i class="fas fa-arrow-left me-2"></i> Ver todas las categorías
                 </a>
             </div>
         `;
+        return;
     }
+    
+    // Mostrar productos
+    productosFiltrados.forEach(producto => {
+        const col = document.createElement('div');
+        col.className = 'col';
+        
+        const productDetailUrl = `/product-detail.html?id=${producto.id}`;
+        
+        col.innerHTML = `
+            <div class="card h-100 shadow-sm product-card">
+                <div class="text-center p-3">
+                    <img src="/assets/images/default.jpg" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
+                    </h5>
+                    <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="fw-bold text-primary">$${formatPrice(producto.precio)}</span>
+                        <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="/assets/images/default.jpg">
+                            <i class="fas fa-cart-plus"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(col);
+    });
+    
+    // Botón para volver
+    const volverDiv = document.createElement('div');
+    volverDiv.className = 'col-12 text-center mt-4';
+    volverDiv.innerHTML = `
+        <a href="/pages/categorias.html" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Ver todas las categorías
+        </a>
+    `;
+    container.appendChild(volverDiv);
 }
 
 // Formatear precios
@@ -338,5 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (categoriesSection) categoriesSection.style.display = 'block';
         if (productsSection) productsSection.style.display = 'none';
+        
+        // Cargar las categorías
+        mostrarCategoriasBootstrap();
     }
 });
