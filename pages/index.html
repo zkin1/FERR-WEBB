@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FERREMAS - Ferretería y Materiales de Construcción</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/header.css">
+    <link rel="stylesheet" href="assets/css/footer.css">
+    <link rel="stylesheet" href="assets/css/productos.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="assets/images/logo.png" alt="FERREMAS">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="categorias.html">Categorías</a></li>
+                    <li><a href="#">Ofertas</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
+            <div class="cart-icon">
+                <a href="carrito.html">
+                    <span class="icon">🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <section class="banner">
+        <img src="assets/images/banner.jpg" alt="Ofertas">
+        <div class="banner-text">
+            <h1>Todo para tu proyecto de construcción</h1>
+            <p>Calidad y variedad en un solo lugar</p>
+            <a href="#productos" class="btn">Ver Productos</a>
+        </div>
+    </section>
+
+    <!-- Categorías -->
+    <section class="categories">
+        <div class="container">
+            <h2>Nuestras Categorías</h2>
+            <div class="categories-grid" id="categories-container">
+                <!-- Las categorías se cargarán dinámicamente aquí -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos Destacados -->
+    <section class="featured-products" id="productos">
+        <div class="container">
+            <h2>Productos Destacados</h2>
+            <div class="products-grid" id="featured-products">
+                <!-- Los productos destacados se cargarán dinámicamente aquí -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos Nuevos -->
+    <section class="new-products">
+        <div class="container">
+            <h2>Productos Nuevos</h2>
+            <div class="products-grid" id="new-products">
+                <!-- Los productos nuevos se cargarán dinámicamente aquí -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-columns">
+                <div class="footer-column">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Enlaces</h3>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="categorias.html">Categorías</a></li>
+                        <li><a href="#">Ofertas</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contacto</h3>
+                    <p>Dirección: Av. Principal 123, Santiago</p>
+                    <p>Teléfono: +56 2 2345 6789</p>
+                    <p>Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/categorias.js"></script>
+    <script src="assets/js/productos.js"></script>
+    <script src="assets/js/carrito.js"></script>
+</body>
+</html>
