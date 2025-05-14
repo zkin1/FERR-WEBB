@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Producto - FERREMAS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <!-- Header/Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" onerror="this.src='/assets/images/default.jpg'">
+                FERREMAS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ferremas-ecommerce/pages/categorias.html">Categorías</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Ofertas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contacto</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="/cart.html" class="btn btn-outline-light position-relative">
+                        <i class="fas fa-shopping-cart"></i> Carrito
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="bg-light py-2">
+        <div class="container">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="/ferremas-ecommerce/pages/categorias.html">Categorías</a></li>
+                <li class="breadcrumb-item" id="product-category">Categoría</li>
+                <li class="breadcrumb-item active" aria-current="page" id="product-name">Nombre del Producto</li>
+            </ol>
+        </div>
+    </nav>
+
+    <!-- Detalle del Producto -->
+    <section class="py-5">
+        <div class="container">
+            <div id="product-container" class="row">
+                <!-- El detalle del producto se cargará dinámicamente aquí -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando detalle del producto...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos Relacionados -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-4">Productos Relacionados</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="related-products">
+                <!-- Los productos relacionados se cargarán dinámicamente aquí -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando productos relacionados...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>Enlaces</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/ferremas-ecommerce/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Ofertas</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Dirección: Av. Principal 123, Santiago</p>
+                    <p><i class="fas fa-phone me-2"></i> Teléfono: +56 2 2345 6789</p>
+                    <p><i class="fas fa-envelope me-2"></i> Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts propios -->
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/productos.js"></script>
+    <script src="/assets/js/carrito.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Obtener ID de producto de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            console.log('ID del producto:', productId); // Para debug
+            
+            if (productId) {
+                // Función en página para mostrar detalle de producto
+                mostrarDetalleProductoBootstrap(productId);
+            } else {
+                // Redirigir a la página principal si no hay ID
+                window.location.href = '/index.html';
+            }
+        });
+        
+        // Función para mostrar detalle de producto con Bootstrap
+        async function mostrarDetalleProductoBootstrap(productId) {
+            const productContainer = document.getElementById('product-container');
+            if (!productContainer) return;
+            
+            try {
+                // Intentar obtener datos del producto directamente de la API
+                const response = await fetch(`http://localhost:3000/api/productos/${productId}`);
+                
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el producto');
+                }
+                
+                const producto = await response.json();
+                
+                // Imagen predeterminada
+                const defaultImage = '/assets/images/default.jpg';
+                
+                // Generar HTML para el producto con Bootstrap
+                productContainer.innerHTML = `
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <img src="${defaultImage}" class="img-fluid w-100" alt="${producto.nombre}" id="main-product-image" style="max-height: 400px; object-fit: contain;">
+                            </div>
+                            <div class="card-footer bg-white p-3">
+                                <div class="d-flex justify-content-center" id="image-thumbnails">
+                                    <div class="thumbnail-item active me-2" data-index="0">
+                                        <img src="${defaultImage}" class="img-thumbnail" alt="${producto.nombre}" style="width: 60px; height: 60px; object-fit: cover;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h1 class="h2 mb-3">${producto.nombre}</h1>
+                        <p class="text-muted mb-3">Código: ${producto.codigo}</p>
+                        
+                        <div class="mb-4">
+                            ${producto.precio_oferta ? 
+                                `<p class="text-decoration-line-through text-muted mb-1">$${formatPrice(producto.precio)}</p>
+                                <p class="h3 text-danger">$${formatPrice(producto.precio_oferta)}</p>` : 
+                                `<p class="h3">$${formatPrice(producto.precio)}</p>`
+                            }
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p>${producto.descripcion || 'Sin descripción disponible'}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <span class="badge bg-success p-2">
+                                <i class="fas fa-check-circle me-1"></i> Stock disponible
+                            </span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="product-quantity" class="form-label">Cantidad</label>
+                            <div class="input-group" style="width: 150px;">
+                                <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" id="product-quantity" class="form-control text-center" value="1" min="1" max="10">
+                                <button class="btn btn-outline-secondary" type="button" id="increase-quantity">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-lg w-100" id="add-to-cart-btn">
+                            <i class="fas fa-cart-plus me-2"></i> Agregar al carrito
+                        </button>
+                        
+                        <div class="mt-4">
+                            <div class="accordion" id="productAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpecs">
+                                            <i class="fas fa-list-ul me-2"></i> Especificaciones
+                                        </button>
+                                    </h2>
+                                    <div id="collapseSpecs" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+                                        <div class="accordion-body">
+                                            <table class="table table-striped">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Marca</th>
+                                                        <td>Stanley</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Material</th>
+                                                        <td>Acero</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Peso</th>
+                                                        <td>16 oz</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Actualizar título de la página y breadcrumb
+                document.title = `${producto.nombre} - FERREMAS`;
+                document.getElementById('product-name').textContent = producto.nombre;
+                document.getElementById('product-category').textContent = "Herramientas";
+                
+                // Cargar productos relacionados de muestra con Bootstrap
+                mostrarProductosRelacionadosBootstrap();
+                
+                // Agregar funcionalidad a los botones
+                const decreaseBtn = document.getElementById('decrease-quantity');
+                const increaseBtn = document.getElementById('increase-quantity');
+                const quantityInput = document.getElementById('product-quantity');
+                const addToCartBtn = document.getElementById('add-to-cart-btn');
+                
+                if (decreaseBtn && increaseBtn && quantityInput) {
+                    decreaseBtn.addEventListener('click', () => {
+                        let value = parseInt(quantityInput.value);
+                        if (value > 1) {
+                            quantityInput.value = value - 1;
+                        }
+                    });
+                    
+                    increaseBtn.addEventListener('click', () => {
+                        let value = parseInt(quantityInput.value);
+                        quantityInput.value = value + 1;
+                    });
+                }
+                
+                if (addToCartBtn) {
+                    addToCartBtn.addEventListener('click', () => {
+                        const cantidad = parseInt(quantityInput.value);
+                        
+                        const productData = {
+                            id: producto.id,
+                            nombre: producto.nombre,
+                            precio: producto.precio_oferta || producto.precio,
+                            imagen: defaultImage,
+                            cantidad: cantidad
+                        };
+                        
+                        // Usar la función de addToCart si está disponible
+                        if (typeof addToCart === 'function') {
+                            addToCart(productData);
+                            showToast('¡Producto agregado al carrito!');
+                        } else {
+                            showToast('Producto agregado al carrito');
+                        }
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar el producto:', error);
+                mostrarProductoDeMuestraBootstrap(productContainer);
+            }
+        }
+        
+        // Función para mostrar productos relacionados con Bootstrap
+        function mostrarProductosRelacionadosBootstrap() {
+            const relatedContainer = document.getElementById('related-products');
+            if (!relatedContainer) return;
+            
+            const defaultImage = '/assets/images/default.jpg';
+            
+            relatedContainer.innerHTML = `
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top" style="height: 200px;">
+                            <a href="/product-detail.html?id=2">
+                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 1" style="object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=2" class="text-decoration-none">Destornillador Phillips</a>
+                            </h5>
+                            <div class="card-text mt-auto mb-3">
+                                <span class="fw-bold">$9.99</span>
+                            </div>
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top" style="height: 200px;">
+                            <a href="/product-detail.html?id=3">
+                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 2" style="object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=3" class="text-decoration-none">Sierra Circular</a>
+                            </h5>
+                            <div class="card-text mt-auto mb-3">
+                                <span class="fw-bold">$89.99</span>
+                            </div>
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top" style="height: 200px;">
+                            <a href="/product-detail.html?id=4">
+                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 3" style="object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=4" class="text-decoration-none">Taladro Eléctrico</a>
+                            </h5>
+                            <div class="card-text mt-auto mb-3">
+                                <span class="fw-bold">$49.99</span>
+                            </div>
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Función para mostrar un producto de muestra en caso de error con Bootstrap
+        function mostrarProductoDeMuestraBootstrap(container) {
+            const defaultImage = '/assets/images/default.jpg';
+            
+            // Datos de ejemplo
+            const producto = {
+                id: 1,
+                nombre: 'Martillo de Carpintero 16oz',
+                codigo: 'HM001',
+                precio: 15.99,
+                descripcion: 'Martillo de carpintero con mango ergonómico y cabeza de acero forjado'
+            };
+            
+            // Generar HTML para el producto de muestra con Bootstrap
+            container.innerHTML = `
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <img src="${defaultImage}" class="img-fluid w-100" alt="${producto.nombre}" style="max-height: 400px; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h1 class="h2 mb-3">${producto.nombre}</h1>
+                    <p class="text-muted mb-3">Código: ${producto.codigo}</p>
+                    
+                    <div class="mb-4">
+                        <p class="h3">$${formatPrice(producto.precio)}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p>${producto.descripcion}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="badge bg-success p-2">
+                            <i class="fas fa-check-circle me-1"></i> Stock disponible
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="product-quantity" class="form-label">Cantidad</label>
+                        <div class="input-group" style="width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="product-quantity" class="form-control text-center" value="1" min="1" max="10">
+                            <button class="btn btn-outline-secondary" type="button" id="increase-quantity">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-lg w-100" id="add-to-cart-btn">
+                        <i class="fas fa-cart-plus me-2"></i> Agregar al carrito
+                    </button>
+                </div>
+            `;
+            
+            // Actualizar título de la página
+            document.title = `${producto.nombre} - FERREMAS`;
+            document.getElementById('product-name').textContent = producto.nombre;
+            
+            // Mostrar productos relacionados de muestra con Bootstrap
+            mostrarProductosRelacionadosBootstrap();
+            
+            // Agregar funcionalidad a los botones
+            const decreaseBtn = document.getElementById('decrease-quantity');
+            const increaseBtn = document.getElementById('increase-quantity');
+            const quantityInput = document.getElementById('product-quantity');
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            
+            if (decreaseBtn && increaseBtn && quantityInput) {
+                decreaseBtn.addEventListener('click', () => {
+                    let value = parseInt(quantityInput.value);
+                    if (value > 1) {
+                        quantityInput.value = value - 1;
+                    }
+                });
+                
+                increaseBtn.addEventListener('click', () => {
+                    let value = parseInt(quantityInput.value);
+                    quantityInput.value = value + 1;
+                });
+            }
+            
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', () => {
+                    showToast('Producto agregado al carrito');
+                });
+            }
+        }
+        
+        // Función para mostrar toast de Bootstrap
+        function showToast(message) {
+            // Crear toast container si no existe
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Crear el toast
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = 'toast align-items-center text-white bg-success border-0';
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Inicializar y mostrar el toast
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Eliminar el toast después de ocultarse
+            toast.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+        
+        // Función para formatear precios
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-CL').format(price);
+        }
+    </script>
+</body>
+</html>

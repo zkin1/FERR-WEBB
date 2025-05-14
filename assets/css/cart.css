@@ -1,0 +1,129 @@
+/* Estilos para la página del carrito */
+.cart-section {
+    padding: 40px 0;
+    min-height: 400px;
+}
+
+.cart-section h1 {
+    margin-bottom: 30px;
+    color: var(--primary-color);
+}
+
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.cart-table th {
+    background-color: var(--light-gray);
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.cart-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+}
+
+.product-info img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-right: 15px;
+}
+
+.product-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-btn {
+    width: 30px;
+    height: 30px;
+    background-color: var(--light-gray);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.quantity-input {
+    width: 40px;
+    text-align: center;
+    margin: 0 10px;
+    padding: 5px;
+    border: 1px solid var(--dark-gray);
+    border-radius: var(--border-radius);
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.cart-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.cart-summary {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+}
+
+.total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.empty-cart p {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background-color: var(--success);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}

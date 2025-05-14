@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - FERREMAS</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/header.css">
+    <link rel="stylesheet" href="assets/css/footer.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="assets/images/logo.png" alt="FERREMAS">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="./index.html">Inicio</a></li>
+                    <li><a href="categorias.html">Categorías</a></li>
+                    <li><a href="#">Ofertas</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
+            <div class="cart-icon">
+                <a href="carrito.html">
+                    <span class="icon">🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul>
+                <li><a href="./index.html">Inicio</a></li>
+                <li><span>Carrito de Compras</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contenido del Carrito -->
+    <section class="cart-section">
+        <div class="container">
+            <h1>Carrito de Compras</h1>
+            <div id="cart-items">
+                <!-- El contenido del carrito se cargará dinámicamente aquí -->
+            </div>
+            <div class="cart-summary">
+                <div class="total">
+                    <span>Total:</span>
+                    <span id="cart-total">$0</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-columns">
+                <div class="footer-column">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Enlaces</h3>
+                    <ul>
+                        <li><a href="./index.html">Inicio</a></li>
+                        <li><a href="categorias.html">Categorías</a></li>
+                        <li><a href="#">Ofertas</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contacto</h3>
+                    <p>Dirección: Av. Principal 123, Santiago</p>
+                    <p>Teléfono: +56 2 2345 6789</p>
+                    <p>Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/carrito.js"></script>
+</body>
+</html>

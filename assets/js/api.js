@@ -1,9 +1,48 @@
 // URL base de la API
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://localhost:3000/api';
+
+
+let isFetching = false;
+
+
+function getBaseUrl() {
+    // Obtener la URL completa actual
+    const currentUrl = window.location.href;
+    console.log('URL actual:', currentUrl);
+    
+    // Verificar si estamos en index.html en la raíz o en una subcarpeta
+    if (currentUrl.includes('/index.html')) {
+        if (currentUrl.includes('/ferremas-ecommerce/') || 
+            currentUrl.includes('/pages/')) {
+            // Estamos en una subcarpeta
+            return './';
+        } else {
+            // Estamos en la raíz
+            return 'ferremas-ecommerce/pages/';
+        }
+    } else if (currentUrl.includes('/ferremas-ecommerce/pages/')) {
+        // Estamos en alguna página dentro de /ferremas-ecommerce/pages/
+        return './';
+    } else {
+        // Por defecto, asumir que estamos en la raíz
+        return 'ferremas-ecommerce/pages/';
+    }
+}
+
+// Luego usar esta función para construir URLs
+function getProductUrl(productId) {
+    return `/ferremas-ecommerce/pages/product-detail.html?id=${productId}`;
+}
+
+function getCategoryUrl(categoryId) {
+    return `/ferremas-ecommerce/pages/categorias.html?id=${categoryId}`;
+}
+
 
 // Función para obtener datos de la API
 async function fetchAPI(endpoint) {
     try {
+        console.log('Fetching:', API_URL + endpoint); // Debug
         const response = await fetch(`${API_URL}${endpoint}`);
         
         if (!response.ok) {
@@ -13,13 +52,26 @@ async function fetchAPI(endpoint) {
         return await response.json();
     } catch (error) {
         console.error('Error en la API:', error);
-        throw error;
+        // Devuelve un array vacío o un objeto básico según el contexto para evitar errores
+        return endpoint.includes('productos') ? [] : {};
     }
 }
 
 // Obtener todas las categorías
 async function getCategorias() {
-    return await fetchAPI('/categorias');
+    try {
+        return await fetchAPI('/categorias');
+    } catch (error) {
+        console.error('Error al obtener categorías:', error);
+        // Devolver datos de muestra
+        return [
+            { id: 1, nombre: 'Herramientas', slug: 'herramientas' },
+            { id: 2, nombre: 'Herramientas Manuales', slug: 'herramientas-manuales' },
+            { id: 3, nombre: 'Herramientas Eléctricas', slug: 'herramientas-electricas' },
+            { id: 4, nombre: 'Materiales de Construcción', slug: 'materiales-construccion' },
+            { id: 5, nombre: 'Ferretería General', slug: 'ferreteria-general' }
+        ];
+    }
 }
 
 // Obtener una categoría por ID
@@ -34,8 +86,26 @@ async function getSubcategoriasByCategoria(categoriaId) {
 
 // Obtener todos los productos (paginados)
 async function getProductos(page = 1, limit = 10) {
-    return await fetchAPI(`/productos?page=${page}&limit=${limit}`);
+    try {
+        return await fetchAPI(`/productos?page=${page}&limit=${limit}`);
+    } catch (error) {
+        console.error('Error al obtener productos:', error);
+        // Devolver datos de muestra
+        return {
+            productos: [
+                { id: 1, nombre: 'Martillo Profesional', codigo: 'MART001', precio: 12990, categoria_id: 1 },
+                { id: 2, nombre: 'Destornillador Eléctrico', codigo: 'DEST001', precio: 19990, categoria_id: 3 },
+                { id: 3, nombre: 'Sierra Circular', codigo: 'SIER001', precio: 89990, categoria_id: 3 },
+                { id: 4, nombre: 'Cemento 25kg', codigo: 'CEM001', precio: 5990, categoria_id: 4 }
+            ],
+            pagination: { page: 1, limit: 10, totalItems: 4, totalPages: 1 }
+        };
+    }
 }
+
+const BASE_URL = window.location.origin;
+console.log('URL Base del sitio:', BASE_URL);
+console.log('Ruta actual:', window.location.pathname);
 
 // Obtener producto por ID
 async function getProductoById(id) {

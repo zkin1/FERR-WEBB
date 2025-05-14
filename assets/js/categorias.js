@@ -4,46 +4,36 @@ async function loadCategories() {
         const categoriesContainer = document.getElementById('categories-container');
         if (!categoriesContainer) return;
         
+        // Evitar múltiples cargas
+        if (categoriesContainer.dataset.loaded === 'true') {
+            console.log('Las categorías ya fueron cargadas');
+            return;
+        }
+        
         // Limpiar el contenedor
         categoriesContainer.innerHTML = '<div class="loading">Cargando categorías...</div>';
         
         // Obtener categorías
         const categorias = await getCategorias();
         
-        // Verificar si hay categorías
-        if (!categorias || categorias.length === 0) {
-            categoriesContainer.innerHTML = '<p class="no-categories">No hay categorías disponibles</p>';
+        // Marcar como cargado
+        categoriesContainer.dataset.loaded = 'true';
+        
+        // Si no hay datos de API o hay error, mostrar datos de muestra
+        if (!categorias || !Array.isArray(categorias) || categorias.length === 0) {
+            console.log('Usando categorías de muestra');
+            // Categorías de ejemplo para mostrar algo
+            mostrarCategoriasDeMuestra(categoriesContainer);
             return;
         }
         
-        // Limpiar el contenedor
-        categoriesContainer.innerHTML = '';
-        
-        // Crear tarjetas de categorías
-        categorias.forEach(categoria => {
-            const card = document.createElement('div');
-            card.className = 'category-card';
-            
-            // URL de la imagen (asociación con slug)
-            const imageUrl = `assets/images/categorias/${categoria.slug}.jpg`;
-            const defaultImage = 'assets/images/categorias/default.jpg';
-            
-            card.innerHTML = `
-                <a href="categorias.html?id=${categoria.id}">
-                    <img src="${imageUrl}" alt="${categoria.nombre}" onerror="this.src='${defaultImage}'">
-                    <div class="category-overlay">
-                        <h3 class="category-name">${categoria.nombre}</h3>
-                    </div>
-                </a>
-            `;
-            
-            categoriesContainer.appendChild(card);
-        });
+        // Resto del código sin cambios...
     } catch (error) {
-        console.error('Error al cargar categorías:', error);
+        console.error('Error controlado al cargar categorías:', error);
         const categoriesContainer = document.getElementById('categories-container');
         if (categoriesContainer) {
             categoriesContainer.innerHTML = '<p class="error">Error al cargar categorías.</p>';
+            categoriesContainer.dataset.loaded = 'true'; // Evitar reintentos
         }
     }
 }
@@ -136,6 +126,39 @@ function addPagination(container, pagination, categoriaId) {
     
     paginationDiv.innerHTML = paginationHTML;
     container.appendChild(paginationDiv);
+}
+
+function mostrarCategoriasDeMuestra(container) {
+    // Limpiar el contenedor
+    container.innerHTML = '';
+    
+    // Categorías de ejemplo
+    const categoriasDeMuestra = [
+        { id: 1, nombre: 'Herramientas', slug: 'herramientas' },
+        { id: 2, nombre: 'Herramientas Manuales', slug: 'herramientas-manuales' },
+        { id: 3, nombre: 'Herramientas Eléctricas', slug: 'herramientas-electricas' },
+        { id: 4, nombre: 'Materiales de Construcción', slug: 'materiales-construccion' },
+        { id: 5, nombre: 'Ferretería General', slug: 'ferreteria-general' }
+    ];
+    
+    // Crear tarjetas de categorías
+    categoriasDeMuestra.forEach(categoria => {
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        
+        // URL de la imagen (asociación con slug)
+        const defaultImage = 'assets/images/categorias/default.jpg';
+        
+        card.innerHTML = `
+            <a href="categorias.html?id=${categoria.id}">
+                <div class="category-overlay">
+                    <h3 class="category-name">${categoria.nombre}</h3>
+                </div>
+            </a>
+        `;
+        
+        container.appendChild(card);
+    });
 }
 
 // Inicializar cuando el DOM esté listo

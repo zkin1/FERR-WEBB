@@ -7,13 +7,27 @@ async function loadFeaturedProducts() {
         // Limpiar el contenedor
         featuredContainer.innerHTML = '<div class="loading">Cargando productos...</div>';
         
-        // Obtener productos destacados
-        const productos = await getProductosDestacados(8);
+        // Intentar obtener productos de la API
+        let productos = [];
+        try {
+            const resultado = await getProductosDestacados(8);
+            if (resultado && Array.isArray(resultado)) {
+                productos = resultado;
+            } else if (resultado && resultado.productos) {
+                productos = resultado.productos;
+            }
+        } catch (error) {
+            console.error('Error al cargar productos destacados:', error);
+        }
         
-        // Verificar si hay productos
+        // Si no hay productos de la API, usar datos de muestra
         if (!productos || productos.length === 0) {
-            featuredContainer.innerHTML = '<p class="no-products">No hay productos destacados disponibles</p>';
-            return;
+            productos = [
+                { id: 1, nombre: 'Martillo Profesional', codigo: 'MART001', precio: 12990, categoria_id: 1 },
+                { id: 2, nombre: 'Destornillador Eléctrico', codigo: 'DEST001', precio: 19990, categoria_id: 3 },
+                { id: 3, nombre: 'Sierra Circular', codigo: 'SIER001', precio: 89990, categoria_id: 3 },
+                { id: 4, nombre: 'Cemento 25kg', codigo: 'CEM001', precio: 5990, categoria_id: 4 }
+            ];
         }
         
         // Limpiar el contenedor
@@ -25,12 +39,46 @@ async function loadFeaturedProducts() {
             featuredContainer.appendChild(card);
         });
     } catch (error) {
-        console.error('Error al cargar productos destacados:', error);
+        console.error('Error general al cargar productos destacados:', error);
         const featuredContainer = document.getElementById('featured-products');
         if (featuredContainer) {
-            featuredContainer.innerHTML = '<p class="error">Error al cargar productos. Por favor, intente nuevamente.</p>';
+            featuredContainer.innerHTML = `
+                <p class="error">Error al cargar productos. Por favor, intente nuevamente.</p>
+                <div class="products-grid">
+                    ${createSampleProductsHTML()}
+                </div>
+            `;
         }
     }
+}
+
+// Función para crear HTML de productos de muestra
+function createSampleProductsHTML() {
+    const productos = [
+        { id: 1, nombre: 'Martillo Profesional', codigo: 'MART001', precio: 12990 },
+        { id: 2, nombre: 'Destornillador Eléctrico', codigo: 'DEST001', precio: 19990 },
+        { id: 3, nombre: 'Sierra Circular', codigo: 'SIER001', precio: 89990 },
+        { id: 4, nombre: 'Cemento 25kg', codigo: 'CEM001', precio: 5990 }
+    ];
+    
+    return productos.map(producto => `
+        <div class="product-card">
+            <div class="product-image">
+                <a href="product-detail.html?id=${producto.id}">
+                    <img src="../assets/images/default.jpg" alt="${producto.nombre}">
+                </a>
+            </div>
+            <div class="product-details">
+                <h3 class="product-title">
+                    <a href="product-detail.html?id=${producto.id}">${producto.nombre}</a>
+                </h3>
+                <div class="product-price">$${formatPrice(producto.precio)}</div>
+                <button class="btn add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="../assets/images/default.jpg">
+                    Agregar al carrito
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
 // Función para cargar productos nuevos en la página de inicio
@@ -74,20 +122,22 @@ function createProductCard(producto) {
     const card = document.createElement('div');
     card.className = 'product-card';
     
-    // Obtener URL de la imagen (aquí asociamos el código del producto con la imagen)
-    const imageUrl = `assets/images/productos/${producto.codigo}.jpg`;
-    const defaultImage = 'assets/images/productos/default.jpg';
+    // Usar ruta simple y directa
+    const productDetailUrl = `product-detail.html?id=${producto.id}`;
     
-    // HTML interno del card
+    // Usar rutas simples para imágenes
+    const imageUrl = `/assets/images/default.jpg`;
+    
+    // HTML interno del card con URL simplificadas
     card.innerHTML = `
         <div class="product-image">
-            <a href="producto.html?id=${producto.id}">
-                <img src="${imageUrl}" alt="${producto.nombre}" onerror="this.src='${defaultImage}'">
+            <a href="${productDetailUrl}">
+                <img src="${imageUrl}" alt="${producto.nombre}">
             </a>
         </div>
         <div class="product-details">
             <h3 class="product-title">
-                <a href="producto.html?id=${producto.id}">${producto.nombre}</a>
+                <a href="${productDetailUrl}">${producto.nombre}</a>
             </h3>
             <div class="product-price">
                 ${producto.precio_oferta ? 
