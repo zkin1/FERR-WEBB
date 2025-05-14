@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FERREMAS - Ferretería y Materiales de Construcción</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
-    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -17,39 +13,145 @@
     
     <!-- Estilos propios -->
     <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    
+    <style>
+        /* Estilos mejorados para tarjetas de categoría */
+        .category-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .category-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .category-content {
+            position: relative;
+            z-index: 2;
+            min-height: 250px; /* Altura fija para todas las tarjetas */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Ajuste del contenedor principal para igualar alturas */
+        .row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        
+        .row-cols-1.row-cols-md-2.row-cols-lg-3 .card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-icon {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .category-card .btn {
+            transition: all 0.3s ease;
+            opacity: 0.9;
+        }
+        
+        .category-card:hover .btn {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+        
+        /* Mejora para el título de sección */
+        h2.section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+        
+        h2.section-title::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background-color: #0d6efd;
+            bottom: 0;
+            left: 25%;
+        }
+        
+        /* Animación para productos */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Header/Navbar Bootstrap -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <!-- Header/Navbar Bootstrap Mejorado -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/index.html">
-                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" onerror="this.src='/assets/images/default.jpg'">
-                FERREMAS
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default.jpg'">
+                <span class="fw-bold">FERREMAS</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/index.html">Inicio</a>
+                        <a class="nav-link active" href="/index.html">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ferremas-ecommerce/pages/categorias.html">Categorías</a>
+                        <a class="nav-link" href="/pages/categorias.html">
+                            <i class="fas fa-th-large me-1"></i> Categorías
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Ofertas</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-tag me-1"></i> Ofertas
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Contacto</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-phone me-1"></i> Contacto
+                        </a>
                     </li>
                 </ul>
-                <div class="d-flex">
-                    <a href="/cart.html" class="btn btn-outline-light position-relative">
-                        <i class="fas fa-shopping-cart"></i> Carrito
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
-                    </a>
-                </div>
+                <form class="d-flex me-2">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                <a href="/cart.html" class="btn btn-outline-light position-relative">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -68,55 +170,219 @@
         </div>
     </div>
 
-    <!-- Categorías -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center mb-4">Nuestras Categorías</h2>
-            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4" id="categories-container">
-                <!-- Las categorías se cargarán dinámicamente aquí -->
-                <div class="col text-center">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="d-flex justify-content-center align-items-center bg-secondary bg-opacity-10" style="height: 150px;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Productos Destacados -->
     <section class="py-5" id="productos">
         <div class="container">
-            <h2 class="text-center mb-4">Productos Destacados</h2>
+            <h2 class="text-center section-title">Productos Destacados</h2>
+            <p class="text-center text-muted mb-4">Los productos más populares de nuestra tienda</p>
+            
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="featured-products">
-                <!-- Los productos destacados se cargarán dinámicamente aquí -->
+                <!-- Producto 1 -->
                 <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="d-flex justify-content-center align-items-center bg-secondary bg-opacity-10" style="height: 200px;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-danger">Oferta</span>
+                        </div>
+                        <div class="text-center p-3">
+                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Martillo Profesional" style="height: 150px; object-fit: contain;">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=1" class="text-decoration-none">Martillo Profesional</a>
+                            </h5>
+                            <p class="card-text text-muted small">Código: MART001</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">$12.990</span>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="1" data-nombre="Martillo Profesional" data-precio="12990" data-imagen="/assets/images/default.jpg">
+                                    <i class="fas fa-cart-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Producto 2 -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="text-center p-3">
+                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Destornillador Eléctrico" style="height: 150px; object-fit: contain;">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=2" class="text-decoration-none">Destornillador Eléctrico</a>
+                            </h5>
+                            <p class="card-text text-muted small">Código: DEST001</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">$19.990</span>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="2" data-nombre="Destornillador Eléctrico" data-precio="19990" data-imagen="/assets/images/default.jpg">
+                                    <i class="fas fa-cart-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Producto 3 -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-success">Nuevo</span>
+                        </div>
+                        <div class="text-center p-3">
+                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Sierra Circular" style="height: 150px; object-fit: contain;">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=3" class="text-decoration-none">Sierra Circular</a>
+                            </h5>
+                            <p class="card-text text-muted small">Código: SIER001</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">$89.990</span>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="3" data-nombre="Sierra Circular" data-precio="89990" data-imagen="/assets/images/default.jpg">
+                                    <i class="fas fa-cart-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Producto 4 -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="text-center p-3">
+                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Cemento 25kg" style="height: 150px; object-fit: contain;">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/product-detail.html?id=4" class="text-decoration-none">Cemento 25kg</a>
+                            </h5>
+                            <p class="card-text text-muted small">Código: CEM001</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">$5.990</span>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="4" data-nombre="Cemento 25kg" data-precio="5990" data-imagen="/assets/images/default.jpg">
+                                    <i class="fas fa-cart-plus"></i> Agregar
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="text-center mt-4">
+                <a href="/pages/categorias.html" class="btn btn-primary">
+                    Ver todos los productos <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
     </section>
 
-    <!-- Productos Nuevos -->
+    <!-- Categorías Mejoradas -->
     <section class="py-5 bg-light">
         <div class="container">
-            <h2 class="text-center mb-4">Productos Nuevos</h2>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="new-products">
-                <!-- Los productos nuevos se cargarán dinámicamente aquí -->
+            <h2 class="text-center section-title">Nuestras Categorías</h2>
+            <p class="text-center text-muted mb-5">Encuentra todo lo que necesitas para tu proyecto</p>
+            
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="categories-container">
+                <!-- Categoría 1 -->
                 <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="d-flex justify-content-center align-items-center bg-secondary bg-opacity-10" style="height: 200px;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
+                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            <div class="category-gradient" style="background: linear-gradient(45deg, #007bff, #00c3ff);"></div>
+                            <div class="category-content p-4 text-white">
+                                <div class="category-icon mb-3">
+                                    <i class="fas fa-tools fa-3x"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Herramientas</h3>
+                                <p class="mb-0 opacity-75">Todo tipo de herramientas para profesionales y aficionados</p>
+                                <div class="mt-auto pt-3">
+                                    <a href="/pages/categorias.html?id=1" class="btn btn-sm btn-light">
+                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categoría 2 -->
+                <div class="col">
+                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            <div class="category-gradient" style="background: linear-gradient(45deg, #28a745, #7fd858);"></div>
+                            <div class="category-content p-4 text-white">
+                                <div class="category-icon mb-3">
+                                    <i class="fas fa-hammer fa-3x"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Herramientas Manuales</h3>
+                                <p class="mb-0 opacity-75">Martillos, destornilladores, llaves y mucho más</p>
+                                <div class="mt-auto pt-3">
+                                    <a href="/pages/categorias.html?id=2" class="btn btn-sm btn-light">
+                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categoría 3 -->
+                <div class="col">
+                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            <div class="category-gradient" style="background: linear-gradient(45deg, #fd7e14, #ffb84d);"></div>
+                            <div class="category-content p-4 text-white">
+                                <div class="category-icon mb-3">
+                                    <i class="fas fa-bolt fa-3x"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Herramientas Eléctricas</h3>
+                                <p class="mb-0 opacity-75">Taladros, sierras eléctricas y equipos de alta potencia</p>
+                                <div class="mt-auto pt-3">
+                                    <a href="/pages/categorias.html?id=3" class="btn btn-sm btn-light">
+                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categoría 4 -->
+                <div class="col">
+                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            <div class="category-gradient" style="background: linear-gradient(45deg, #6f42c1, #a885e0);"></div>
+                            <div class="category-content p-4 text-white">
+                                <div class="category-icon mb-3">
+                                    <i class="fas fa-building fa-3x"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Materiales de Construcción</h3>
+                                <p class="mb-0 opacity-75">Cemento, ladrillos, madera y todos los materiales que necesitas</p>
+                                <div class="mt-auto pt-3">
+                                    <a href="/pages/categorias.html?id=4" class="btn btn-sm btn-light">
+                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categoría 5 -->
+                <div class="col">
+                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            <div class="category-gradient" style="background: linear-gradient(45deg, #ffc107, #ffe066);"></div>
+                            <div class="category-content p-4 text-white">
+                                <div class="category-icon mb-3">
+                                    <i class="fas fa-cogs fa-3x"></i>
+                                </div>
+                                <h3 class="h4 mb-2">Ferretería General</h3>
+                                <p class="mb-0 opacity-75">Tornillos, tuercas, clavos y todo tipo de accesorios</p>
+                                <div class="mt-auto pt-3">
+                                    <a href="/pages/categorias.html?id=5" class="btn btn-sm btn-light">
+                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -137,7 +403,7 @@
                     <h3>Enlaces</h3>
                     <ul class="list-unstyled">
                         <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
-                        <li><a href="/ferremas-ecommerce/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                        <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
                         <li><a href="#" class="text-white text-decoration-none">Ofertas</a></li>
                         <li><a href="#" class="text-white text-decoration-none">Contacto</a></li>
                     </ul>
@@ -180,26 +446,27 @@
             
             // HTML interno del card con Bootstrap
             card.innerHTML = `
-                <div class="card h-100 shadow-sm">
-                    <div class="card-img-top overflow-hidden" style="height: 200px;">
-                        <a href="${productDetailUrl}">
-                            <img src="${imageUrl}" class="img-fluid w-100 h-100" alt="${producto.nombre}" style="object-fit: contain;">
-                        </a>
+                <div class="card h-100 shadow-sm product-card">
+                    <div class="text-center p-3">
+                        <img src="${imageUrl}" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;">
                     </div>
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">
                             <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
                         </h5>
-                        <div class="card-text mt-auto mb-3">
+                        <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
                             ${producto.precio_oferta ? 
-                                `<span class="text-decoration-line-through text-muted me-2">$${formatPrice(producto.precio)}</span>
-                                <span class="fw-bold text-danger">$${formatPrice(producto.precio_oferta)}</span>` : 
-                                `<span class="fw-bold">$${formatPrice(producto.precio)}</span>`
+                                `<div>
+                                    <span class="text-decoration-line-through text-muted me-1">$${formatPrice(producto.precio)}</span>
+                                    <span class="fw-bold text-danger">$${formatPrice(producto.precio_oferta)}</span>
+                                </div>` : 
+                                `<span class="fw-bold text-primary">$${formatPrice(producto.precio)}</span>`
                             }
+                            <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio_oferta || producto.precio}" data-imagen="${imageUrl}">
+                                <i class="fas fa-cart-plus"></i> Agregar
+                            </button>
                         </div>
-                        <button class="btn btn-primary w-100 add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio_oferta || producto.precio}" data-imagen="${imageUrl}">
-                            <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
-                        </button>
                     </div>
                 </div>
             `;
@@ -220,6 +487,11 @@
             });
             
             return card;
+        }
+        
+        // Función para formatear precios
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-CL').format(price);
         }
         
         // Función para mostrar toast de Bootstrap en lugar de alertas
@@ -262,6 +534,48 @@
                 this.remove();
             });
         }
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar el contador de carrito
+            updateCartCount();
+            
+            // Agregar evento a los botones de agregar al carrito
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productData = {
+                        id: this.dataset.id,
+                        nombre: this.dataset.nombre,
+                        precio: parseFloat(this.dataset.precio),
+                        imagen: this.dataset.imagen,
+                        cantidad: 1
+                    };
+                    
+                    addToCart(productData);
+                    showToast('Producto agregado al carrito');
+                });
+            });
+            
+            // Intentar cargar productos destacados a través de la API
+            try {
+                if (typeof getProductosDestacados === 'function') {
+                    getProductosDestacados(4).then(function(productos) {
+                        const featuredContainer = document.getElementById('featured-products');
+                        if (featuredContainer && productos && productos.length > 0) {
+                            featuredContainer.innerHTML = '';
+                            productos.forEach(function(producto) {
+                                featuredContainer.appendChild(createProductCard(producto));
+                            });
+                        }
+                    }).catch(function(error) {
+                        console.log('Error al cargar productos destacados:', error);
+                    });
+                }
+            } catch (error) {
+                console.log('No se pudieron cargar productos dinámicamente, usando ejemplos');
+            }
+        });
     </script>
 </body>
 </html>
