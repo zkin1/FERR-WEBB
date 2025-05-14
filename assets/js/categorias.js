@@ -1,184 +1,289 @@
-// Función para cargar categorías en la página principal
-async function loadCategories() {
-    try {
-        const categoriesContainer = document.getElementById('categories-container');
-        if (!categoriesContainer) return;
-        
-        // Evitar múltiples cargas
-        if (categoriesContainer.dataset.loaded === 'true') {
-            console.log('Las categorías ya fueron cargadas');
-            return;
-        }
-        
-        // Limpiar el contenedor
-        categoriesContainer.innerHTML = '<div class="loading">Cargando categorías...</div>';
-        
-        // Obtener categorías
-        const categorias = await getCategorias();
-        
-        // Marcar como cargado
-        categoriesContainer.dataset.loaded = 'true';
-        
-        // Si no hay datos de API o hay error, mostrar datos de muestra
-        if (!categorias || !Array.isArray(categorias) || categorias.length === 0) {
-            console.log('Usando categorías de muestra');
-            // Categorías de ejemplo para mostrar algo
-            mostrarCategoriasDeMuestra(categoriesContainer);
-            return;
-        }
-        
-        // Resto del código sin cambios...
-    } catch (error) {
-        console.error('Error controlado al cargar categorías:', error);
-        const categoriesContainer = document.getElementById('categories-container');
-        if (categoriesContainer) {
-            categoriesContainer.innerHTML = '<p class="error">Error al cargar categorías.</p>';
-            categoriesContainer.dataset.loaded = 'true'; // Evitar reintentos
-        }
+// Función unificada para crear enlaces a categorías
+function createCategoryUrl(categoriaId) {
+    // Si ya estamos en la página de categorías, solo cambiar el parámetro
+    if (window.location.pathname.includes('categorias.html')) {
+        return `?id=${categoriaId}`;
+    } else {
+        // URL absoluta hacia la página de categorías
+        return `/pages/categorias.html?id=${categoriaId}`;
     }
 }
 
-// Función para cargar los productos de una categoría específica
-async function loadCategoryProducts(categoriaId) {
+// Función para mostrar categorías
+async function mostrarCategoriasBootstrap() {
+    const container = document.getElementById('categories-container');
+    if (!container) return;
+    
     try {
-        const productsContainer = document.getElementById('category-products');
-        const categoryTitleElem = document.getElementById('category-title');
+        // Intentar obtener categorías de la API
+        const response = await fetch('http://localhost:3000/api/categorias');
         
-        if (!productsContainer) return;
+        if (!response.ok) {
+            throw new Error('No se pudieron cargar las categorías');
+        }
+        
+        const categorias = await response.json();
         
         // Limpiar el contenedor
-        productsContainer.innerHTML = '<div class="loading">Cargando productos...</div>';
+        container.innerHTML = '';
         
-        // Obtener datos de la categoría
-        const categoria = await getCategoriaById(categoriaId);
+        // Colores de fondo para categorías
+        const bgColors = [
+            'rgba(0, 102, 204, 0.8)',  // Azul
+            'rgba(0, 153, 51, 0.8)',   // Verde
+            'rgba(204, 51, 0, 0.8)',   // Rojo
+            'rgba(102, 0, 204, 0.8)',  // Púrpura
+            'rgba(204, 153, 0, 0.8)'   // Ámbar
+        ];
         
-        if (!categoria) {
-            productsContainer.innerHTML = '<p class="error">Categoría no encontrada</p>';
-            return;
-        }
-        
-        // Actualizar título de la categoría
-        if (categoryTitleElem) {
-            categoryTitleElem.textContent = categoria.nombre;
-        }
-        
-        // Obtener productos de la categoría
-        const resultado = await getProductosByCategoria(categoriaId);
-        const productos = resultado.productos;
-        
-        // Verificar si hay productos
-        if (!productos || productos.length === 0) {
-            productsContainer.innerHTML = '<p class="no-products">No hay productos disponibles en esta categoría</p>';
-            return;
-        }
-        
-        // Limpiar el contenedor
-        productsContainer.innerHTML = '';
-        
-        // Crear tarjetas de productos
-        productos.forEach(producto => {
-            const card = createProductCard(producto);
-            productsContainer.appendChild(card);
+        // Mostrar categorías con diseño mejorado
+        categorias.forEach((categoria, index) => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            
+            // Usar un color de fondo diferente para cada categoría
+            const bgColor = bgColors[index % bgColors.length];
+            
+            col.innerHTML = `
+                <a href="${createCategoryUrl(categoria.id)}" class="text-decoration-none">
+                    <div class="category-card shadow" style="background-color: ${bgColor};">
+                        <div class="category-overlay">
+                            <h3 class="category-name">${categoria.nombre}</h3>
+                        </div>
+                    </div>
+                </a>
+            `;
+            
+            container.appendChild(col);
         });
         
-        // Agregar paginación si hay más de una página
-        if (resultado.pagination && resultado.pagination.totalPages > 1) {
-            addPagination(productsContainer, resultado.pagination, categoriaId);
-        }
     } catch (error) {
-        console.error('Error al cargar productos de la categoría:', error);
-        const productsContainer = document.getElementById('category-products');
-        if (productsContainer) {
-            productsContainer.innerHTML = '<p class="error">Error al cargar productos.</p>';
-        }
+        console.error('Error al cargar categorías:', error);
+        // Mostrar categorías de muestra
+        mostrarCategoriasDeMuestraBootstrap();
     }
 }
 
-// Función para añadir paginación
-function addPagination(container, pagination, categoriaId) {
-    const paginationDiv = document.createElement('div');
-    paginationDiv.className = 'pagination';
+// Función para mostrar categorías de muestra
+function mostrarCategoriasDeMuestraBootstrap() {
+    const container = document.getElementById('categories-container');
+    if (!container) return;
     
-    let paginationHTML = '';
+    // Categorías de ejemplo
+    const categorias = [
+        { id: 1, nombre: 'Herramientas', color: 'rgba(0, 102, 204, 0.8)' },
+        { id: 2, nombre: 'Materiales', color: 'rgba(0, 153, 51, 0.8)' },
+        { id: 3, nombre: 'Electricidad', color: 'rgba(204, 51, 0, 0.8)' },
+        { id: 4, nombre: 'Plomería', color: 'rgba(102, 0, 204, 0.8)' },
+        { id: 5, nombre: 'Ferretería General', color: 'rgba(204, 153, 0, 0.8)' }
+    ];
     
-    // Botón anterior
-    if (pagination.page > 1) {
-        paginationHTML += `<a href="categorias.html?id=${categoriaId}&page=${pagination.page - 1}" class="page-link">Anterior</a>`;
-    } else {
-        paginationHTML += `<span class="page-link disabled">Anterior</span>`;
-    }
-    
-    // Páginas
-    for (let i = 1; i <= pagination.totalPages; i++) {
-        if (i === pagination.page) {
-            paginationHTML += `<span class="page-link active">${i}</span>`;
-        } else {
-            paginationHTML += `<a href="categorias.html?id=${categoriaId}&page=${i}" class="page-link">${i}</a>`;
-        }
-    }
-    
-    // Botón siguiente
-    if (pagination.page < pagination.totalPages) {
-        paginationHTML += `<a href="categorias.html?id=${categoriaId}&page=${pagination.page + 1}" class="page-link">Siguiente</a>`;
-    } else {
-        paginationHTML += `<span class="page-link disabled">Siguiente</span>`;
-    }
-    
-    paginationDiv.innerHTML = paginationHTML;
-    container.appendChild(paginationDiv);
-}
-
-function mostrarCategoriasDeMuestra(container) {
     // Limpiar el contenedor
     container.innerHTML = '';
     
-    // Categorías de ejemplo
-    const categoriasDeMuestra = [
-        { id: 1, nombre: 'Herramientas', slug: 'herramientas' },
-        { id: 2, nombre: 'Herramientas Manuales', slug: 'herramientas-manuales' },
-        { id: 3, nombre: 'Herramientas Eléctricas', slug: 'herramientas-electricas' },
-        { id: 4, nombre: 'Materiales de Construcción', slug: 'materiales-construccion' },
-        { id: 5, nombre: 'Ferretería General', slug: 'ferreteria-general' }
-    ];
-    
-    // Crear tarjetas de categorías
-    categoriasDeMuestra.forEach(categoria => {
-        const card = document.createElement('div');
-        card.className = 'category-card';
+    // Mostrar categorías de muestra
+    categorias.forEach(categoria => {
+        const col = document.createElement('div');
+        col.className = 'col';
         
-        // URL de la imagen (asociación con slug)
-        const defaultImage = 'assets/images/categorias/default.jpg';
-        
-        card.innerHTML = `
-            <a href="categorias.html?id=${categoria.id}">
-                <div class="category-overlay">
-                    <h3 class="category-name">${categoria.nombre}</h3>
+        col.innerHTML = `
+            <a href="${createCategoryUrl(categoria.id)}" class="text-decoration-none">
+                <div class="category-card shadow" style="background-color: ${categoria.color};">
+                    <div class="category-overlay">
+                        <h3 class="category-name">${categoria.nombre}</h3>
+                    </div>
                 </div>
             </a>
         `;
         
-        container.appendChild(card);
+        container.appendChild(col);
     });
 }
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    // Cargar categorías en la página principal
-    if (window.location.pathname === '/' || window.location.pathname.includes('index.html')) {
-        loadCategories();
+// Función para mostrar productos de una categoría
+async function mostrarProductosCategoriaBootstrap(categoriaId) {
+    const container = document.getElementById('category-products');
+    const titleElement = document.getElementById('category-title');
+    const categoryNameElement = document.getElementById('category-name');
+    
+    if (!container) return;
+    
+    try {
+        // Intentar obtener productos de la categoría desde la API
+        const response = await fetch(`http://localhost:3000/api/categorias/${categoriaId}/productos`);
+        
+        if (!response.ok) {
+            throw new Error('No se pudieron cargar los productos');
+        }
+        
+        const result = await response.json();
+        const productos = result.productos || result;
+        
+        // También obtener información de la categoría
+        const catResponse = await fetch(`http://localhost:3000/api/categorias/${categoriaId}`);
+        let categoria = { nombre: `Categoría #${categoriaId}` };
+        
+        if (catResponse.ok) {
+            categoria = await catResponse.json();
+        }
+        
+        // Cambiar título
+        if (titleElement) titleElement.textContent = `Productos de ${categoria.nombre}`;
+        if (categoryNameElement) categoryNameElement.textContent = categoria.nombre;
+        
+        // Ocultar la sección de categorías cuando mostramos productos
+        const categoriesSection = document.querySelector('section:not(.bg-light)');
+        if (categoriesSection) {
+            categoriesSection.style.display = 'none';
+        }
+        
+        // Limpiar el contenedor
+        container.innerHTML = '';
+        
+        if (!productos || productos.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No hay productos disponibles en esta categoría
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Mostrar productos con Bootstrap
+        productos.forEach(producto => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            
+            const defaultImage = '/assets/images/default.jpg';
+            
+            col.innerHTML = `
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-top overflow-hidden" style="height: 200px;">
+                        <a href="/product-detail.html?id=${producto.id}">
+                            <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="${producto.nombre}" style="object-fit: contain;">
+                        </a>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="/product-detail.html?id=${producto.id}" class="text-decoration-none">${producto.nombre}</a>
+                        </h5>
+                        <div class="card-text mt-auto mb-3">
+                            ${producto.precio_oferta ? 
+                                `<span class="text-decoration-line-through text-muted me-2">$${formatPrice(producto.precio)}</span>
+                                <span class="fw-bold text-danger">$${formatPrice(producto.precio_oferta)}</span>` : 
+                                `<span class="fw-bold">$${formatPrice(producto.precio)}</span>`
+                            }
+                        </div>
+                        <button class="btn btn-primary w-100 add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio_oferta || producto.precio}" data-imagen="${defaultImage}">
+                            <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(col);
+            
+            // Agregar evento al botón
+            const addButton = col.querySelector('.add-to-cart');
+            if (addButton) {
+                addButton.addEventListener('click', function() {
+                    const productData = {
+                        id: this.dataset.id,
+                        nombre: this.dataset.nombre,
+                        precio: parseFloat(this.dataset.precio),
+                        imagen: this.dataset.imagen,
+                        cantidad: 1
+                    };
+                    
+                    if (typeof addToCart === 'function') {
+                        addToCart(productData);
+                        showToast('Producto agregado al carrito');
+                    } else {
+                        showToast('Producto agregado al carrito (simulación)');
+                    }
+                });
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error al cargar productos. Por favor, intente nuevamente.
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Formatear precios
+function formatPrice(price) {
+    return new Intl.NumberFormat('es-CL').format(price);
+}
+
+// Mostrar toast
+function showToast(message) {
+    // Crear toast container si no existe
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
     }
     
-    // Cargar productos de la categoría en la página de categoría
-    if (window.location.pathname.includes('categorias.html')) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoriaId = urlParams.get('id');
-        const page = urlParams.get('page') || 1;
-        
-        if (categoriaId) {
-            loadCategoryProducts(categoriaId, page);
-        } else {
-            // Si no hay categoría especificada, mostrar todas las categorías
-            loadCategories();
-        }
+    // Crear el toast
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = 'toast align-items-center text-white bg-success border-0';
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Inicializar y mostrar el toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Eliminar el toast después de ocultarse
+    toast.addEventListener('hidden.bs.toast', function() {
+        this.remove();
+    });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
+    // Obtener ID de categoría de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoriaId = urlParams.get('id');
+    
+    // Flag para controlar si ya se cargó contenido
+    let contentLoaded = false;
+    
+    if (categoriaId) {
+        // Cargar productos de la categoría
+        mostrarProductosCategoriaBootstrap(categoriaId);
+        contentLoaded = true;
+    }
+    
+    // Solo mostrar todas las categorías si no hemos cargado productos específicos
+    if (!contentLoaded) {
+        mostrarCategoriasBootstrap();
     }
 });

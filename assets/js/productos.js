@@ -430,7 +430,7 @@ async function loadCategories() {
             const defaultImage = 'assets/images/categorias/default.jpg';
             
             card.innerHTML = `
-                <a href="categorias.html?id=${categoria.id}">
+                <a href="/pages/categorias.html?id=${categoria.id}">
                     <img src="${imageUrl}" alt="${categoria.nombre}" onerror="this.src='${defaultImage}'">
                     <div class="category-overlay">
                         <h3 class="category-name">${categoria.nombre}</h3>

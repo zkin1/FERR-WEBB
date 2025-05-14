@@ -1,0 +1,143 @@
+/* Nuevo archivo: /assets/css/custom-bootstrap.css */
+
+/* Ajustes generales para integrar con Bootstrap */
+:root {
+    --bs-primary: #0066cc;
+    --bs-secondary: #ff6600;
+    --bs-success: #28a745;
+    --bs-danger: #dc3545;
+    --bs-warning: #ffcc00;
+    --bs-info: #17a2b8;
+    --bs-light: #f8f9fa;
+    --bs-dark: #343a40;
+}
+
+/* Estilo mejorado para categorías */
+.category-card {
+    height: 180px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+    position: relative;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.category-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease;
+}
+
+.category-card:hover .category-overlay {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8));
+}
+
+.category-name {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Estilos para producto card */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.product-image img {
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+/* Estilos para página de detalle */
+.product-detail-image {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.product-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.thumbnail-item {
+    width: 70px;
+    height: 70px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.thumbnail-item.active {
+    border-color: var(--bs-primary);
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mejoras al Navbar */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Estilos para las notificaciones toast */
+.toast {
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para la página de categorías */
+.category-header {
+    background-color: var(--bs-light);
+    padding: 40px 0;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.category-header h1 {
+    margin-bottom: 0;
+    color: var(--bs-primary);
+}
+
+/* Mejoras para el breadcrumb */
+.breadcrumb {
+    font-size: 0.9rem;
+}
+
+.breadcrumb-item+.breadcrumb-item::before {
+    content: "›";
+}
