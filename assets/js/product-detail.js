@@ -7,10 +7,13 @@
 (function() {
     // Configuración interna
     const config = {
-        apiUrl: 'http://localhost:3000/api',
-        defaultImage: '/assets/images/default.jpg',
-        temporaryStockFix: true // Habilitar arreglo temporal para problemas de stock
-    };
+    // En lugar de hardcodear localhost, detecta la URL base automáticamente
+    apiUrl: window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000/api'
+        : `http://${window.location.hostname}:3000/api`,
+    defaultImage: '/assets/images/default.jpg',
+    temporaryStockFix: true
+};
 
     // Función principal que se ejecuta cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {

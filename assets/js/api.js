@@ -42,8 +42,11 @@ function getCategoryUrl(categoryId) {
 // Función para obtener datos de la API
 async function fetchAPI(endpoint) {
     try {
-        console.log('Fetching:', API_URL + endpoint); // Debug
-        const response = await fetch(`${API_URL}${endpoint}`);
+        // Usar la URL de la API desde la configuración global
+        const apiUrl = window.APP_CONFIG ? window.APP_CONFIG.API_URL : 'http://localhost:3000/api';
+        console.log('Fetching:', apiUrl + endpoint); // Debug
+        
+        const response = await fetch(`${apiUrl}${endpoint}`);
         
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
