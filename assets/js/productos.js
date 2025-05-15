@@ -181,7 +181,7 @@ async function loadProductDetail(productId) {
         // Obtener datos del producto
         const producto = await getProductoById(productId);
 
-         // NUEVO: Obtener stock del producto
+        // Obtener stock del producto desde el API de inventario
         let stockInfo = { disponible: 0, ubicaciones: [] };
         try {
             const stockResult = await window.inventarioSoap.getProductStock(productId);
@@ -191,34 +191,24 @@ async function loadProductDetail(productId) {
                     stockResult.stockItems.stockItem : [stockResult.stockItems.stockItem];
                 
                 // Calcular stock total disponible
-                stockInfo.disponible = stockItems.reduce((total, item) => total + item.cantidad, 0);
+                stockInfo.disponible = stockItems.reduce((total, item) => total + parseInt(item.cantidad || 0), 0);
                 
                 // Guardar información de ubicaciones
                 stockInfo.ubicaciones = stockItems.map(item => ({
                     ubicacionId: item.ubicacion_id,
                     ubicacionNombre: item.ubicacion_nombre,
-                    cantidad: item.cantidad
-                }));
+                    cantidad: parseInt(item.cantidad || 0)
+                })).filter(item => item.cantidad > 0); // Solo mostrar ubicaciones con stock
             }
         } catch (error) {
             console.error('Error al obtener stock:', error);
         }
-
-                const stockHtml = `
-            <div class="stock-info">
-                <span class="${stockInfo.disponible > 0 ? 'in-stock' : 'out-of-stock'}">
-                    ${stockInfo.disponible > 0 ? `Stock disponible: ${stockInfo.disponible} unidades` : 'Sin stock'}
-                </span>
-                ${stockInfo.ubicaciones.length > 0 ? `
-                <div class="ubicaciones-stock mt-2">
-                    <small>Disponible en:</small>
-                    <ul class="ps-3 mt-1">
-                        ${stockInfo.ubicaciones.map(ubi => 
-                            `<li>${ubi.ubicacionNombre}: ${ubi.cantidad} unidades</li>`).join('')}
-                    </ul>
-                </div>` : ''}
-            </div>
-        `;
+        
+        // Verificar si el producto está activo
+        const isProductActive = producto.estado === 'activo';
+        
+        // Combinar estado de stock y estado del producto
+        const isAvailable = isProductActive && stockInfo.disponible > 0;
         
         // Obtener imágenes del producto
         const imagenes = await getImagenesProducto(productId);
@@ -246,7 +236,7 @@ async function loadProductDetail(productId) {
             `assets/images/productos/${producto.codigo}.jpg`;
         const defaultImage = 'assets/images/productos/default.jpg';
         
-        // Crear HTML del detalle del producto
+        // Crear HTML para las miniaturas
         let thumbnailsHtml = '';
         if (imagenes && imagenes.length > 0) {
             thumbnailsHtml = '<div class="thumbnails">';
@@ -287,6 +277,21 @@ async function loadProductDetail(productId) {
             `;
         }
         
+        // Preparar mensaje de disponibilidad
+        let availabilityMessage = '';
+        let availabilityClass = '';
+        
+        if (!isProductActive) {
+            availabilityMessage = 'Producto no disponible';
+            availabilityClass = 'out-of-stock';
+        } else if (stockInfo.disponible <= 0) {
+            availabilityMessage = 'Sin stock';
+            availabilityClass = 'out-of-stock';
+        } else {
+            availabilityMessage = `Stock disponible: ${stockInfo.disponible} unidades`;
+            availabilityClass = 'in-stock';
+        }
+        
         // Generar HTML completo del detalle
         productContainer.innerHTML = `
             <div class="product-images">
@@ -307,18 +312,29 @@ async function loadProductDetail(productId) {
                 <div class="product-description">
                     ${producto.descripcion || 'Sin descripción disponible'}
                 </div>
+                
+                <!-- Información de stock mejorada -->
                 <div class="stock-info">
-                    <span class="${producto.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-                        ${producto.stock > 0 ? `Stock disponible: ${producto.stock} unidades` : 'Sin stock'}
+                    <span class="${availabilityClass}">
+                        ${availabilityMessage}
                     </span>
+                    ${(isAvailable && stockInfo.ubicaciones.length > 0) ? `
+                    <div class="ubicaciones-stock mt-2">
+                        <small>Disponible en:</small>
+                        <ul class="ps-3 mt-1">
+                            ${stockInfo.ubicaciones.map(ubi => 
+                                `<li>${ubi.ubicacionNombre}: ${ubi.cantidad} unidades</li>`).join('')}
+                        </ul>
+                    </div>` : ''}
                 </div>
+                
                 <div class="product-quantity">
-                    <button class="quantity-btn" id="decrease-quantity">-</button>
-                    <input type="number" id="product-quantity" class="quantity-input" value="1" min="1" max="${producto.stock}">
-                    <button class="quantity-btn" id="increase-quantity">+</button>
+                    <button class="quantity-btn" id="decrease-quantity" ${!isAvailable ? 'disabled' : ''}>-</button>
+                    <input type="number" id="product-quantity" class="quantity-input" value="1" min="1" max="${stockInfo.disponible}" ${!isAvailable ? 'disabled' : ''}>
+                    <button class="quantity-btn" id="increase-quantity" ${!isAvailable ? 'disabled' : ''}>+</button>
                 </div>
-                <button class="btn add-to-cart-detail" id="add-to-cart-btn" ${producto.stock <= 0 ? 'disabled' : ''}>
-                    ${producto.stock > 0 ? 'Agregar al carrito' : 'Sin stock'}
+                <button class="btn add-to-cart-detail" id="add-to-cart-btn" ${!isAvailable ? 'disabled' : ''}>
+                    ${isAvailable ? 'Agregar al carrito' : 'No disponible'}
                 </button>
                 ${specsHtml}
             </div>
@@ -330,58 +346,66 @@ async function loadProductDetail(productId) {
         const quantityInput = document.getElementById('product-quantity');
         const addToCartBtn = document.getElementById('add-to-cart-btn');
         
-        decreaseBtn.addEventListener('click', () => {
-            let value = parseInt(quantityInput.value);
-            if (value > 1) {
-                quantityInput.value = value - 1;
-            }
-        });
-        
-        increaseBtn.addEventListener('click', () => {
-            let value = parseInt(quantityInput.value);
-            if (value < producto.stock) {
-                quantityInput.value = value + 1;
-            }
-        });
-        
-        // Agregar evento para las miniaturas
-        const thumbnails = document.querySelectorAll('.thumbnail');
-        thumbnails.forEach(thumb => {
-            thumb.addEventListener('click', function() {
-                // Remover clase active de todas las miniaturas
-                thumbnails.forEach(t => t.classList.remove('active'));
-                // Agregar clase active al thumbnail clickeado
-                this.classList.add('active');
-                
-                // Cambiar imagen principal
-                const index = this.dataset.index;
-                const mainImage = document.getElementById('main-product-image');
-                mainImage.src = `assets/images/productos/${producto.codigo}_${parseInt(index)+1}.jpg`;
-                mainImage.onerror = function() {
-                    this.src = defaultImage;
-                };
+        if (isAvailable) {
+            decreaseBtn.addEventListener('click', () => {
+                let value = parseInt(quantityInput.value);
+                if (value > 1) {
+                    quantityInput.value = value - 1;
+                }
             });
-        });
+            
+            increaseBtn.addEventListener('click', () => {
+                let value = parseInt(quantityInput.value);
+                if (value < stockInfo.disponible) {
+                    quantityInput.value = value + 1;
+                }
+            });
+            
+            // Agregar evento para las miniaturas
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    // Remover clase active de todas las miniaturas
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    // Agregar clase active al thumbnail clickeado
+                    this.classList.add('active');
+                    
+                    // Cambiar imagen principal
+                    const index = this.dataset.index;
+                    const mainImage = document.getElementById('main-product-image');
+                    mainImage.src = `assets/images/productos/${producto.codigo}_${parseInt(index)+1}.jpg`;
+                    mainImage.onerror = function() {
+                        this.src = defaultImage;
+                    };
+                });
+            });
+            
+            // Agregar evento al botón de agregar al carrito
+            addToCartBtn.addEventListener('click', function() {
+                if (!isAvailable) return;
+                
+                const cantidad = parseInt(quantityInput.value);
+                if (cantidad < 1 || cantidad > stockInfo.disponible) return;
+                
+                const productData = {
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    precio: producto.precio_oferta || producto.precio,
+                    imagen: mainImageUrl,
+                    cantidad: cantidad,
+                    stock: stockInfo.disponible
+                };
+                
+                addToCart(productData);
+                showNotification('Producto agregado al carrito');
+            });
+        }
         
-        // Agregar evento al botón de agregar al carrito
-        addToCartBtn.addEventListener('click', function() {
-            if (stockInfo.disponible <= 0) return;
-            
-            const cantidad = parseInt(quantityInput.value);
-            if (cantidad < 1 || cantidad > stockInfo.disponible) return;
-            
-            const productData = {
-                id: producto.id,
-                nombre: producto.nombre,
-                precio: producto.precio_oferta || producto.precio,
-                imagen: mainImageUrl,
-                cantidad: cantidad,
-                stock: stockInfo.disponible // Añadimos el stock disponible
-            };
-            
-            addToCart(productData);
-            showNotification('Producto agregado al carrito');
-        });
+        // Cargar productos relacionados si existe la función
+        if (typeof loadRelatedProducts === 'function' && producto.categoria_id) {
+            loadRelatedProducts(producto.categoria_id, productId);
+        }
+        
     } catch (error) {
         console.error('Error al cargar detalle del producto:', error);
         const productContainer = document.getElementById('product-container');

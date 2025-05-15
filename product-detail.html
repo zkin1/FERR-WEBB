@@ -11,6 +11,36 @@
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style> 
+        .stock-info {
+            margin: 15px 0;
+        }
+
+        .in-stock {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .out-of-stock {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .ubicaciones-stock {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .ubicaciones-stock ul {
+            margin: 5px 0 0 0;
+            padding-left: 15px;
+        }
+
+        button:disabled, input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <!-- Header/Navbar Bootstrap -->
@@ -125,368 +155,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Scripts propios -->
-    <script src="/assets/js/api.js"></script>
-    <script src="/assets/js/productos.js"></script>
-    <script src="/assets/js/carrito.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Obtener ID de producto de la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('id');
-            
-            console.log('ID del producto:', productId); // Para debug
-            
-            if (productId) {
-                // Función en página para mostrar detalle de producto
-                mostrarDetalleProductoBootstrap(productId);
-            } else {
-                // Redirigir a la página principal si no hay ID
-                window.location.href = '/index.html';
-            }
-        });
-        
-        // Función para mostrar detalle de producto con Bootstrap
-        async function mostrarDetalleProductoBootstrap(productId) {
-            const productContainer = document.getElementById('product-container');
-            if (!productContainer) return;
-            
-            try {
-                // Intentar obtener datos del producto directamente de la API
-                const response = await fetch(`http://localhost:3000/api/productos/${productId}`);
-                
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el producto');
-                }
-                
-                const producto = await response.json();
-                
-                // Imagen predeterminada
-                const defaultImage = '/assets/images/default.jpg';
-                
-                // Generar HTML para el producto con Bootstrap
-                productContainer.innerHTML = `
-                    <div class="col-md-6 mb-4">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-0">
-                                <img src="${defaultImage}" class="img-fluid w-100" alt="${producto.nombre}" id="main-product-image" style="max-height: 400px; object-fit: contain;">
-                            </div>
-                            <div class="card-footer bg-white p-3">
-                                <div class="d-flex justify-content-center" id="image-thumbnails">
-                                    <div class="thumbnail-item active me-2" data-index="0">
-                                        <img src="${defaultImage}" class="img-thumbnail" alt="${producto.nombre}" style="width: 60px; height: 60px; object-fit: cover;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h1 class="h2 mb-3">${producto.nombre}</h1>
-                        <p class="text-muted mb-3">Código: ${producto.codigo}</p>
-                        
-                        <div class="mb-4">
-                            ${producto.precio_oferta ? 
-                                `<p class="text-decoration-line-through text-muted mb-1">$${formatPrice(producto.precio)}</p>
-                                <p class="h3 text-danger">$${formatPrice(producto.precio_oferta)}</p>` : 
-                                `<p class="h3">$${formatPrice(producto.precio)}</p>`
-                            }
-                        </div>
-                        
-                        <div class="mb-4">
-                            <p>${producto.descripcion || 'Sin descripción disponible'}</p>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <span class="badge bg-success p-2">
-                                <i class="fas fa-check-circle me-1"></i> Stock disponible
-                            </span>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="product-quantity" class="form-label">Cantidad</label>
-                            <div class="input-group" style="width: 150px;">
-                                <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <input type="number" id="product-quantity" class="form-control text-center" value="1" min="1" max="10">
-                                <button class="btn btn-outline-secondary" type="button" id="increase-quantity">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary btn-lg w-100" id="add-to-cart-btn">
-                            <i class="fas fa-cart-plus me-2"></i> Agregar al carrito
-                        </button>
-                `;
-                
-                // Actualizar título de la página y breadcrumb
-                document.title = `${producto.nombre} - FERREMAS`;
-                document.getElementById('product-name').textContent = producto.nombre;
-                document.getElementById('product-category').textContent = "Herramientas";
-                
-                // Cargar productos relacionados de muestra con Bootstrap
-                mostrarProductosRelacionadosBootstrap();
-                
-                // Agregar funcionalidad a los botones
-                const decreaseBtn = document.getElementById('decrease-quantity');
-                const increaseBtn = document.getElementById('increase-quantity');
-                const quantityInput = document.getElementById('product-quantity');
-                const addToCartBtn = document.getElementById('add-to-cart-btn');
-                
-                if (decreaseBtn && increaseBtn && quantityInput) {
-                    decreaseBtn.addEventListener('click', () => {
-                        let value = parseInt(quantityInput.value);
-                        if (value > 1) {
-                            quantityInput.value = value - 1;
-                        }
-                    });
-                    
-                    increaseBtn.addEventListener('click', () => {
-                        let value = parseInt(quantityInput.value);
-                        quantityInput.value = value + 1;
-                    });
-                }
-                
-                if (addToCartBtn) {
-                    addToCartBtn.addEventListener('click', () => {
-                        const cantidad = parseInt(quantityInput.value);
-                        
-                        const productData = {
-                            id: producto.id,
-                            nombre: producto.nombre,
-                            precio: producto.precio_oferta || producto.precio,
-                            imagen: defaultImage,
-                            cantidad: cantidad
-                        };
-                        
-                        // Usar la función de addToCart si está disponible
-                        if (typeof addToCart === 'function') {
-                            addToCart(productData);
-                            showToast('¡Producto agregado al carrito!');
-                        } else {
-                            showToast('Producto agregado al carrito');
-                        }
-                    });
-                }
-                
-            } catch (error) {
-                console.error('Error al cargar el producto:', error);
-                mostrarProductoDeMuestraBootstrap(productContainer);
-            }
-        }
-        
-        // Función para mostrar productos relacionados con Bootstrap
-        function mostrarProductosRelacionadosBootstrap() {
-            const relatedContainer = document.getElementById('related-products');
-            if (!relatedContainer) return;
-            
-            const defaultImage = '/assets/images/default.jpg';
-            
-            relatedContainer.innerHTML = `
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-img-top" style="height: 200px;">
-                            <a href="/product-detail.html?id=2">
-                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 1" style="object-fit: contain;">
-                            </a>
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=2" class="text-decoration-none">Destornillador Phillips</a>
-                            </h5>
-                            <div class="card-text mt-auto mb-3">
-                                <span class="fw-bold">$9.99</span>
-                            </div>
-                            <button class="btn btn-primary w-100">
-                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-img-top" style="height: 200px;">
-                            <a href="/product-detail.html?id=3">
-                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 2" style="object-fit: contain;">
-                            </a>
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=3" class="text-decoration-none">Sierra Circular</a>
-                            </h5>
-                            <div class="card-text mt-auto mb-3">
-                                <span class="fw-bold">$89.99</span>
-                            </div>
-                            <button class="btn btn-primary w-100">
-                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-img-top" style="height: 200px;">
-                            <a href="/product-detail.html?id=4">
-                                <img src="${defaultImage}" class="img-fluid w-100 h-100" alt="Producto Relacionado 3" style="object-fit: contain;">
-                            </a>
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=4" class="text-decoration-none">Taladro Eléctrico</a>
-                            </h5>
-                            <div class="card-text mt-auto mb-3">
-                                <span class="fw-bold">$49.99</span>
-                            </div>
-                            <button class="btn btn-primary w-100">
-                                <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Función para mostrar un producto de muestra en caso de error con Bootstrap
-        function mostrarProductoDeMuestraBootstrap(container) {
-            const defaultImage = '/assets/images/default.jpg';
-            
-            // Datos de ejemplo
-            const producto = {
-                id: 1,
-                nombre: 'Martillo de Carpintero 16oz',
-                codigo: 'HM001',
-                precio: 15.99,
-                descripcion: 'Martillo de carpintero con mango ergonómico y cabeza de acero forjado'
-            };
-            
-            // Generar HTML para el producto de muestra con Bootstrap
-            container.innerHTML = `
-                <div class="col-md-6 mb-4">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body p-0">
-                            <img src="${defaultImage}" class="img-fluid w-100" alt="${producto.nombre}" style="max-height: 400px; object-fit: contain;">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <h1 class="h2 mb-3">${producto.nombre}</h1>
-                    <p class="text-muted mb-3">Código: ${producto.codigo}</p>
-                    
-                    <div class="mb-4">
-                        <p class="h3">$${formatPrice(producto.precio)}</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <p>${producto.descripcion}</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <span class="badge bg-success p-2">
-                            <i class="fas fa-check-circle me-1"></i> Stock disponible
-                        </span>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="product-quantity" class="form-label">Cantidad</label>
-                        <div class="input-group" style="width: 150px;">
-                            <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" id="product-quantity" class="form-control text-center" value="1" min="1" max="10">
-                            <button class="btn btn-outline-secondary" type="button" id="increase-quantity">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-primary btn-lg w-100" id="add-to-cart-btn">
-                        <i class="fas fa-cart-plus me-2"></i> Agregar al carrito
-                    </button>
-                </div>
-            `;
-            
-            // Actualizar título de la página
-            document.title = `${producto.nombre} - FERREMAS`;
-            document.getElementById('product-name').textContent = producto.nombre;
-            
-            // Mostrar productos relacionados de muestra con Bootstrap
-            mostrarProductosRelacionadosBootstrap();
-            
-            // Agregar funcionalidad a los botones
-            const decreaseBtn = document.getElementById('decrease-quantity');
-            const increaseBtn = document.getElementById('increase-quantity');
-            const quantityInput = document.getElementById('product-quantity');
-            const addToCartBtn = document.getElementById('add-to-cart-btn');
-            
-            if (decreaseBtn && increaseBtn && quantityInput) {
-                decreaseBtn.addEventListener('click', () => {
-                    let value = parseInt(quantityInput.value);
-                    if (value > 1) {
-                        quantityInput.value = value - 1;
-                    }
-                });
-                
-                increaseBtn.addEventListener('click', () => {
-                    let value = parseInt(quantityInput.value);
-                    quantityInput.value = value + 1;
-                });
-            }
-            
-            if (addToCartBtn) {
-                addToCartBtn.addEventListener('click', () => {
-                    showToast('Producto agregado al carrito');
-                });
-            }
-        }
-        
-        // Función para mostrar toast de Bootstrap
-        function showToast(message) {
-            // Crear toast container si no existe
-            let toastContainer = document.getElementById('toast-container');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toast-container';
-                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                document.body.appendChild(toastContainer);
-            }
-            
-            // Crear el toast
-            const toastId = 'toast-' + Date.now();
-            const toast = document.createElement('div');
-            toast.id = toastId;
-            toast.className = 'toast align-items-center text-white bg-success border-0';
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="fas fa-check-circle me-2"></i>${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            // Inicializar y mostrar el toast
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Eliminar el toast después de ocultarse
-            toast.addEventListener('hidden.bs.toast', function() {
-                this.remove();
-            });
-        }
-        
-        // Función para formatear precios
-        function formatPrice(price) {
-            return new Intl.NumberFormat('es-CL').format(price);
-        }
-    </script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/productos.js"></script>
+<script src="/assets/js/carrito.js"></script>
+<script src="/assets/js/inventarioSoap.js"></script>
+<script src="/assets/js/product-detail.js"></script>
 </body>
 </html>
