@@ -42,11 +42,14 @@ function getCategoryUrl(categoryId) {
 // Función para obtener datos de la API
 async function fetchAPI(endpoint) {
     try {
-        // Usar la URL de la API desde la configuración global
-        const apiUrl = window.APP_CONFIG ? window.APP_CONFIG.API_URL : 'http://localhost:3000/api';
-        console.log('Fetching:', apiUrl + endpoint); // Debug
+        // Usar la función helper de APP_CONFIG
+        const apiUrl = window.APP_CONFIG ? 
+            window.APP_CONFIG.getApiUrl(endpoint) : 
+            '/proxy.php?target=api&path=' + encodeURIComponent(endpoint);
+            
+        console.log('Fetching:', apiUrl);
         
-        const response = await fetch(`${apiUrl}${endpoint}`);
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
@@ -55,7 +58,6 @@ async function fetchAPI(endpoint) {
         return await response.json();
     } catch (error) {
         console.error('Error en la API:', error);
-        // Devuelve un array vacío o un objeto básico según el contexto para evitar errores
         return endpoint.includes('productos') ? [] : {};
     }
 }

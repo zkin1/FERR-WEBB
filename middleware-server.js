@@ -91,6 +91,36 @@ app.post('/api/soap/:service/:method', async (req, res) => {
     }
 });
 
+
+async function callSoapService(endpoint, method, params = {}) {
+    try {
+        // Usar la función helper de APP_CONFIG
+        const soapUrl = window.APP_CONFIG ? 
+            window.APP_CONFIG.getSoapUrl(endpoint, method) : 
+            '/proxy.php?target=soap&path=' + encodeURIComponent(endpoint + '/' + method);
+            
+        console.log(`Llamando a ${soapUrl} con parámetros:`, params);
+        
+        const response = await fetch(soapUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error(`Error llamando al servicio SOAP (${endpoint}/${method}):`, error);
+        throw error;
+    }
+}
+
 // Iniciar el servidor y los clientes SOAP
 app.listen(PORT, async () => {
     console.log(`🚀 Middleware iniciado en http://localhost:${PORT}`);

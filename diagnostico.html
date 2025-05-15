@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Conectividad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-4">
+        <h1>Diagnóstico de Conectividad</h1>
+        <div class="card mb-3">
+            <div class="card-header">Información del entorno</div>
+            <div class="card-body" id="info">Cargando...</div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Prueba de API REST</div>
+            <div class="card-body">
+                <button id="test-api" class="btn btn-primary mb-2">Probar API REST</button>
+                <div id="api-result" class="mt-2">No probado aún</div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Prueba de API SOAP</div>
+            <div class="card-body">
+                <button id="test-soap" class="btn btn-primary mb-2">Probar API SOAP</button>
+                <div id="soap-result" class="mt-2">No probado aún</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar información del entorno
+            const infoEl = document.getElementById('info');
+            const info = {
+                userAgent: navigator.userAgent,
+                hostname: window.location.hostname,
+                protocol: window.location.protocol,
+                href: window.location.href
+            };
+            infoEl.innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+
+            // Probar API REST
+            document.getElementById('test-api').addEventListener('click', async function() {
+                const resultEl = document.getElementById('api-result');
+                resultEl.innerHTML = 'Probando...';
+                
+                try {
+                    // Probar acceso directo
+                    const directUrl = `http://${window.location.hostname}:3000/api/categorias`;
+                    resultEl.innerHTML += `<p>Probando acceso directo a: ${directUrl}</p>`;
+                    
+                    try {
+                        const directResponse = await fetch(directUrl);
+                        const directData = await directResponse.json();
+                        resultEl.innerHTML += `<p class="text-success">¡Éxito directo! Respuesta: ${JSON.stringify(directData).substring(0, 100)}...</p>`;
+                    } catch (directError) {
+                        resultEl.innerHTML += `<p class="text-danger">Error directo: ${directError.message}</p>`;
+                        
+                        // Intentar con proxy si falla directo
+                        const proxyUrl = '/proxy.php?target=api&path=categorias';
+                        resultEl.innerHTML += `<p>Probando con proxy: ${proxyUrl}</p>`;
+                        
+                        try {
+                            const proxyResponse = await fetch(proxyUrl);
+                            const proxyData = await proxyResponse.json();
+                            resultEl.innerHTML += `<p class="text-success">¡Éxito con proxy! Respuesta: ${JSON.stringify(proxyData).substring(0, 100)}...</p>`;
+                        } catch (proxyError) {
+                            resultEl.innerHTML += `<p class="text-danger">Error con proxy: ${proxyError.message}</p>`;
+                        }
+                    }
+                } catch (error) {
+                    resultEl.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+                }
+            });
+
+            // Probar API SOAP
+            document.getElementById('test-soap').addEventListener('click', async function() {
+                const resultEl = document.getElementById('soap-result');
+                resultEl.innerHTML = 'Probando...';
+                
+                try {
+                    // Probar acceso directo a SOAP
+                    const directUrl = `http://${window.location.hostname}:3002/api/soap/ubicaciones/GetAllUbicaciones`;
+                    resultEl.innerHTML += `<p>Probando acceso directo a SOAP: ${directUrl}</p>`;
+                    
+                    try {
+                        const directResponse = await fetch(directUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({})
+                        });
+                        const directData = await directResponse.json();
+                        resultEl.innerHTML += `<p class="text-success">¡Éxito directo! Respuesta: ${JSON.stringify(directData).substring(0, 100)}...</p>`;
+                    } catch (directError) {
+                        resultEl.innerHTML += `<p class="text-danger">Error directo: ${directError.message}</p>`;
+                        
+                        // Intentar con proxy si falla directo
+                        const proxyUrl = '/proxy.php?target=soap&path=ubicaciones/GetAllUbicaciones';
+                        resultEl.innerHTML += `<p>Probando con proxy: ${proxyUrl}</p>`;
+                        
+                        try {
+                            const proxyResponse = await fetch(proxyUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({})
+                            });
+                            const proxyData = await proxyResponse.json();
+                            resultEl.innerHTML += `<p class="text-success">¡Éxito con proxy! Respuesta: ${JSON.stringify(proxyData).substring(0, 100)}...</p>`;
+                        } catch (proxyError) {
+                            resultEl.innerHTML += `<p class="text-danger">Error con proxy: ${proxyError.message}</p>`;
+                        }
+                    }
+                } catch (error) {
+                    resultEl.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

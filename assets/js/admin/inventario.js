@@ -30,6 +30,13 @@ async function initStockSection() {
         
         // Inicializar eventos para edición de mínimo/máximo
         setupStockMinMaxEvents();
+
+        console.log('Entorno actual:', {
+        hostname: window.location.hostname,
+        APP_CONFIG: window.APP_CONFIG,
+        inventarioSoap: window.inventarioSoap ? 'disponible' : 'no disponible'
+    });
+
     } catch (error) {
         console.error('Error al inicializar sección de stock:', error);
         showAlert('stock', 'Error al cargar datos de stock', 'danger');
@@ -300,8 +307,13 @@ async function callSoapService(endpoint, method, params = {}) {
         return await window.inventarioSoap.callSoapService(endpoint, method, params);
     } else {
         try {
+            // Usar configuración global para la URL
+            const soapUrl = window.APP_CONFIG ? 
+                window.APP_CONFIG.SOAP_URL : 
+                'http://localhost:3002/api/soap';
+                
             console.log(`Llamando a servicio SOAP ${endpoint}/${method}`, params);
-            const response = await fetch(`http://localhost:3002/api/soap/${endpoint}/${method}`, {
+            const response = await fetch(`${soapUrl}/${endpoint}/${method}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -321,7 +333,6 @@ async function callSoapService(endpoint, method, params = {}) {
         }
     }
 }
-
 
 // Función para cargar datos de stock
 async function loadStockData(page = 1, isLowStock = false) {
@@ -361,7 +372,8 @@ async function loadStockData(page = 1, isLowStock = false) {
             try {
                 if (!item.producto) {
                     // Obtener datos del producto desde la API de productos
-                    const productoResponse = await fetch(`http://localhost:3000/api/productos/${item.producto_id}`);
+                    const apiUrl = window.APP_CONFIG ? window.APP_CONFIG.API_URL : 'http://localhost:3000/api';
+                    const productoResponse = await fetch(`${apiUrl}/productos/${item.producto_id}`);
                     const productoData = await productoResponse.json();
                     item.producto = productoData;
                 }
