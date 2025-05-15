@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario - FERREMAS Admin</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+    <!-- Navegación del panel admin -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin/">FERREMAS Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/productos.html">Productos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/inventario.html">Inventario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/pedidos.html">Pedidos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#stock">
+                                <i class="fas fa-boxes me-2"></i>Stock
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#ubicaciones">
+                                <i class="fas fa-map-marker-alt me-2"></i>Ubicaciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#movimientos">
+                                <i class="fas fa-exchange-alt me-2"></i>Movimientos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#ajustes">
+                                <i class="fas fa-sliders-h me-2"></i>Ajustes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Contenido principal -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Gestión de Inventario</h1>
+                </div>
+
+                <!-- Sección de Stock -->
+                <section id="stock" class="mb-5">
+                    <h2>Stock de Productos</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Buscar producto..." id="search-stock">
+                                <button class="btn btn-primary" type="button" id="btn-search-stock">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-warning" id="btn-low-stock">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Ver Stock Bajo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Producto</th>
+                                    <th>Ubicación</th>
+                                    <th>Cantidad</th>
+                                    <th>Mín/Máx</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table-body">
+                                <!-- Se cargará dinámicamente -->
+                                <tr>
+                                    <td colspan="6" class="text-center">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav aria-label="Paginación de stock">
+                        <ul class="pagination justify-content-center" id="stock-pagination">
+                            <!-- Se cargará dinámicamente -->
+                        </ul>
+                    </nav>
+                </section>
+
+                <!-- Sección de Ubicaciones -->
+                <section id="ubicaciones" class="mb-5">
+                    <h2>Ubicaciones</h2>
+                    <div class="mb-3 text-end">
+                        <button class="btn btn-primary" id="btn-add-ubicacion">
+                            <i class="fas fa-plus me-1"></i>Nueva Ubicación
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ubicaciones-table-body">
+                                <!-- Se cargará dinámicamente -->
+                                <tr>
+                                    <td colspan="6" class="text-center">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Sección de Movimientos -->
+                <section id="movimientos" class="mb-5">
+                    <h2>Movimientos de Inventario</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <select class="form-select" id="movimiento-tipo">
+                                    <option value="">Todos los tipos</option>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                                <input type="date" class="form-control" id="movimiento-fecha">
+                                <button class="btn btn-primary" type="button" id="btn-filter-movimientos">
+                                    <i class="fas fa-filter me-1"></i>Filtrar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-success" id="btn-add-movimiento">
+                                <i class="fas fa-plus me-1"></i>Nuevo Movimiento
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Producto</th>
+                                    <th>Origen</th>
+                                    <th>Destino</th>
+                                    <th>Cantidad</th>
+                                    <th>Referencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movimientos-table-body">
+                                <!-- Se cargará dinámicamente -->
+                                <tr>
+                                    <td colspan="8" class="text-center">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav aria-label="Paginación de movimientos">
+                        <ul class="pagination justify-content-center" id="movimientos-pagination">
+                            <!-- Se cargará dinámicamente -->
+                        </ul>
+                    </nav>
+                </section>
+
+                <!-- Sección de Ajustes -->
+                <section id="ajustes" class="mb-5">
+                    <h2>Ajustes de Inventario</h2>
+                    <div class="mb-3 text-end">
+                        <button class="btn btn-primary" id="btn-add-ajuste">
+                            <i class="fas fa-plus me-1"></i>Nuevo Ajuste
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Producto</th>
+                                    <th>Ubicación</th>
+                                    <th>Cant. Anterior</th>
+                                    <th>Cant. Nueva</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ajustes-table-body">
+                                <!-- Se cargará dinámicamente -->
+                                <tr>
+                                    <td colspan="7" class="text-center">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav aria-label="Paginación de ajustes">
+                        <ul class="pagination justify-content-center" id="ajustes-pagination">
+                            <!-- Se cargará dinámicamente -->
+                        </ul>
+                    </nav>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modales para operaciones CRUD -->
+    
+    <!-- Modal para crear/editar ubicación -->
+    <div class="modal fade" id="ubicacionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ubicacionModalLabel">Nueva Ubicación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="ubicacion-form">
+                        <input type="hidden" id="ubicacion-id">
+                        <div class="mb-3">
+                            <label for="ubicacion-codigo" class="form-label">Código</label>
+                            <input type="text" class="form-control" id="ubicacion-codigo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ubicacion-nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="ubicacion-nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ubicacion-descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="ubicacion-descripcion" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="ubicacion-activo" checked>
+                            <label class="form-check-label" for="ubicacion-activo">Activo</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-ubicacion">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ajustar stock mínimo/máximo -->
+    <div class="modal fade" id="stockMinMaxModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajustar Stock Mínimo/Máximo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="stock-minmax-form">
+                        <input type="hidden" id="stock-id">
+                        <input type="hidden" id="stock-motivo" value="Ajuste manual">
+                        
+                        <div class="mb-3">
+                            <label for="producto-nombre" class="form-label">Producto</label>
+                            <input type="text" class="form-control" id="producto-nombre" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ubicacion-nombre-minmax" class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" id="ubicacion-nombre-minmax" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock-actual" class="form-label">Stock Actual</label>
+                            <input type="number" class="form-control" id="stock-actual">
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock-minimo" class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" id="stock-minimo" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock-maximo" class="form-label">Stock Máximo</label>
+                            <input type="number" class="form-control" id="stock-maximo" min="0" required>
+                        </div>
+                    </form> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-stock-minmax">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para registrar movimiento -->
+    <div class="modal fade" id="movimientoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Movimiento de Inventario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="movimiento-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="movimiento-tipo-id" class="form-label">Tipo de Movimiento</label>
+                                <select class="form-select" id="movimiento-tipo-id" required>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="movimiento-producto-id" class="form-label">Producto</label>
+                                <select class="form-select" id="movimiento-producto-id" required>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="movimiento-origen-id" class="form-label">Ubicación Origen</label>
+                                <select class="form-select" id="movimiento-origen-id">
+                                    <option value="">Seleccione ubicación</option>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="movimiento-destino-id" class="form-label">Ubicación Destino</label>
+                                <select class="form-select" id="movimiento-destino-id">
+                                    <option value="">Seleccione ubicación</option>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="movimiento-cantidad" class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="movimiento-cantidad" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="movimiento-referencia" class="form-label">Referencia</label>
+                                <input type="text" class="form-control" id="movimiento-referencia">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="movimiento-notas" class="form-label">Notas</label>
+                            <textarea class="form-control" id="movimiento-notas" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-movimiento">Registrar Movimiento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para registrar ajuste -->
+<div class="modal fade" id="ajusteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Ajuste de Inventario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ajuste-form">
+                        <div class="mb-3">
+                            <label for="ajuste-producto-id" class="form-label">Producto</label>
+                            <select class="form-select" id="ajuste-producto-id" required>
+                                <!-- Se cargará dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ajuste-ubicacion-id" class="form-label">Ubicación</label>
+                            <select class="form-select" id="ajuste-ubicacion-id" required>
+                                <option value="">Seleccione ubicación</option>
+                                <!-- Se cargará dinámicamente -->
+                            </select>
+                        </div>
+                    <div class="mb-3">
+                        <label for="ajuste-cantidad-actual" class="form-label">Cantidad Actual</label>
+                        <input type="number" class="form-control" id="ajuste-cantidad-actual" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ajuste-cantidad-nueva" class="form-label">Cantidad Nueva</label>
+                        <input type="number" class="form-control" id="ajuste-cantidad-nueva" min="0" required>
+                    </div>
+                        <div class="mb-3">
+                            <label for="ajuste-motivo" class="form-label">Motivo del Ajuste</label>
+                            <select class="form-select" id="ajuste-motivo" required>
+                                <option value="">Seleccione motivo</option>
+                                <option value="Recuento físico">Recuento físico</option>
+                                <option value="Merma">Merma</option>
+                                <option value="Daño">Daño</option>
+                                <option value="Caducidad">Caducidad</option>
+                                <option value="Error sistema">Error en sistema</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ajuste-descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="ajuste-descripcion" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-save-ajuste">Registrar Ajuste</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/inventarioSoap.js"></script>
+    <script src="/assets/js/admin/inventario.js"></script>
+</body>
+</html>

@@ -180,6 +180,45 @@ async function loadProductDetail(productId) {
         
         // Obtener datos del producto
         const producto = await getProductoById(productId);
+
+         // NUEVO: Obtener stock del producto
+        let stockInfo = { disponible: 0, ubicaciones: [] };
+        try {
+            const stockResult = await window.inventarioSoap.getProductStock(productId);
+            
+            if (stockResult && stockResult.stockItems && stockResult.stockItems.stockItem) {
+                const stockItems = Array.isArray(stockResult.stockItems.stockItem) ? 
+                    stockResult.stockItems.stockItem : [stockResult.stockItems.stockItem];
+                
+                // Calcular stock total disponible
+                stockInfo.disponible = stockItems.reduce((total, item) => total + item.cantidad, 0);
+                
+                // Guardar información de ubicaciones
+                stockInfo.ubicaciones = stockItems.map(item => ({
+                    ubicacionId: item.ubicacion_id,
+                    ubicacionNombre: item.ubicacion_nombre,
+                    cantidad: item.cantidad
+                }));
+            }
+        } catch (error) {
+            console.error('Error al obtener stock:', error);
+        }
+
+                const stockHtml = `
+            <div class="stock-info">
+                <span class="${stockInfo.disponible > 0 ? 'in-stock' : 'out-of-stock'}">
+                    ${stockInfo.disponible > 0 ? `Stock disponible: ${stockInfo.disponible} unidades` : 'Sin stock'}
+                </span>
+                ${stockInfo.ubicaciones.length > 0 ? `
+                <div class="ubicaciones-stock mt-2">
+                    <small>Disponible en:</small>
+                    <ul class="ps-3 mt-1">
+                        ${stockInfo.ubicaciones.map(ubi => 
+                            `<li>${ubi.ubicacionNombre}: ${ubi.cantidad} unidades</li>`).join('')}
+                    </ul>
+                </div>` : ''}
+            </div>
+        `;
         
         // Obtener imágenes del producto
         const imagenes = await getImagenesProducto(productId);
@@ -326,26 +365,23 @@ async function loadProductDetail(productId) {
         
         // Agregar evento al botón de agregar al carrito
         addToCartBtn.addEventListener('click', function() {
-            if (producto.stock <= 0) return;
+            if (stockInfo.disponible <= 0) return;
             
             const cantidad = parseInt(quantityInput.value);
-            if (cantidad < 1 || cantidad > producto.stock) return;
+            if (cantidad < 1 || cantidad > stockInfo.disponible) return;
             
             const productData = {
                 id: producto.id,
                 nombre: producto.nombre,
                 precio: producto.precio_oferta || producto.precio,
                 imagen: mainImageUrl,
-                cantidad: cantidad
+                cantidad: cantidad,
+                stock: stockInfo.disponible // Añadimos el stock disponible
             };
             
             addToCart(productData);
             showNotification('Producto agregado al carrito');
         });
-        
-        // Cargar productos relacionados
-        loadRelatedProducts(producto.categoria_id, producto.id);
-        
     } catch (error) {
         console.error('Error al cargar detalle del producto:', error);
         const productContainer = document.getElementById('product-container');
