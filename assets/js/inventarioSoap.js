@@ -163,24 +163,21 @@ async function getMovementTypes() {
 // FUNCIONES DE AJUSTES
 async function registerAdjustment(ajuste) {
     try {
-        // Convertir los nombres de las propiedades al formato esperado
-        const ajusteFormateado = {
-            productoId: parseInt(ajuste.producto_id),
-            ubicacionId: parseInt(ajuste.ubicacion_id),
-            cantidadAnterior: parseInt(ajuste.cantidad_anterior),
-            cantidadNueva: parseInt(ajuste.cantidad_nueva),
-            motivo: ajuste.motivo,
-            descripcion: ajuste.descripcion || ''
-        };
-        
-        // La clave está aquí: enviar el objeto en una estructura anidada
-        // con el nombre "ajuste" o similar como espera el servicio SOAP
+        // Crear la estructura exacta que espera el servicio SOAP
         const payload = {
-            ajuste: ajusteFormateado
+            ajuste: {
+                productoId: parseInt(ajuste.producto_id),
+                ubicacionId: parseInt(ajuste.ubicacion_id),
+                cantidadNueva: parseInt(ajuste.cantidad_nueva),
+                motivoAjuste: ajuste.motivo,  // <-- El nombre correcto es motivoAjuste, no motivo
+                descripcion: ajuste.descripcion || ''
+                // cantidadAnterior no se necesita, el servicio lo obtiene de la BD
+            }
         };
         
-        console.log('Enviando ajuste con estructura anidada:', payload);
+        console.log('Enviando ajuste con la estructura correcta:', payload);
         
+        // Llamada al servicio SOAP
         const result = await callSoapService('ajustes', 'RegistrarAjuste', payload);
         
         console.log('Respuesta de registro de ajuste:', result);

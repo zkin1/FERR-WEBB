@@ -157,27 +157,48 @@ document.addEventListener('DOMContentLoaded', function() {
             // Limpiar tabla
             tablaProductos.innerHTML = '';
             
-            // Cargar datos en la tabla
-            response.productos.forEach(producto => {
-                const row = document.createElement('tr');
+            // Cargar datos en la tabla y obtener información de stock desde la API SOAP
+            for (const producto of response.productos) {
+                // Obtener stock del producto desde la API SOAP
+                let stockTotal = 0;
+                let stockMinimo = 0;
+                
+                try {
+                    const stockData = await window.inventarioSoap.getProductStock(producto.id);
+                    if (stockData && stockData.stockItems && stockData.stockItems.stockItem) {
+                        const stockItems = Array.isArray(stockData.stockItems.stockItem) 
+                            ? stockData.stockItems.stockItem 
+                            : [stockData.stockItems.stockItem];
+                        
+                        // Sumar stock de todas las ubicaciones
+                        stockItems.forEach(item => {
+                            stockTotal += parseInt(item.cantidad) || 0;
+                            // Si el producto tiene stock mínimo, tomamos el más bajo entre todas las ubicaciones
+                            if (item.stock_minimo && (!stockMinimo || parseInt(item.stock_minimo) < stockMinimo)) {
+                                stockMinimo = parseInt(item.stock_minimo);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener stock del producto ${producto.id}:`, error);
+                }
                 
                 // Determinar clase de stock
                 let stockClass = '';
-                let stockCantidad = producto.stock || 0;
-                
-                if (stockCantidad === 0) {
+                if (stockTotal === 0) {
                     stockClass = 'text-danger fw-bold';
-                } else if (producto.stock_minimo && stockCantidad <= producto.stock_minimo) {
+                } else if (stockMinimo && stockTotal <= stockMinimo) {
                     stockClass = 'text-warning fw-bold';
                 }
                 
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${producto.id}</td>
                     <td>${producto.codigo}</td>
                     <td>${producto.nombre}</td>
                     <td>${producto.categoria_nombre || `Categoría ID: ${producto.categoria_id}`}</td>
                     <td>$${producto.precio.toLocaleString()}</td>
-                    <td class="${stockClass}">${stockCantidad}</td>
+                    <td class="${stockClass}">${stockTotal}</td>
                     <td>
                         <span class="badge ${producto.estado === 'activo' ? 'bg-success' : 'bg-danger'}">
                             ${producto.estado === 'activo' ? 'Activo' : 'Inactivo'}
@@ -197,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 
                 tablaProductos.appendChild(row);
-            });
+            }
             
             // Generar paginación
             if (response.pagination) {
@@ -389,6 +410,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function deleteProducto(id) {
+        // Verificar primero si el producto tiene stock asociado
+        try {
+            const stockData = await window.inventarioSoap.getProductStock(id);
+            if (stockData && stockData.stockItems && stockData.stockItems.stockItem) {
+                const stockItems = Array.isArray(stockData.stockItems.stockItem) 
+                    ? stockData.stockItems.stockItem 
+                    : [stockData.stockItems.stockItem];
+                
+                if (stockItems.length > 0) {
+                    const totalStock = stockItems.reduce((total, item) => total + parseInt(item.cantidad || 0), 0);
+                    if (totalStock > 0) {
+                        if (!confirm(`Este producto tiene ${totalStock} unidades en stock. ¿Desea eliminar el producto de todas formas? Esto eliminará también todo el registro de stock.`)) {
+                            return;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error al verificar stock del producto:', error);
+        }
+        
         // Confirmar eliminación
         if (!confirm('¿Está seguro que desea eliminar este producto? Esta acción no se puede deshacer.')) {
             return;
@@ -503,12 +545,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const tablaStock = document.getElementById('tablaStock');
             tablaStock.innerHTML = '<tr><td colspan="7" class="text-center">Cargando datos de stock...</td></tr>';
             
-            // Obtener datos de stock
+            // Obtener datos de stock usando la API SOAP
             let stockData;
             if (isLowStock) {
                 stockData = await window.inventarioSoap.getLowStockProducts(page, 10);
             } else {
-                stockData = await window.inventarioSoap.getAllStock(page, 10);
+                if (stockFilterUbicacion) {
+                    stockData = await window.inventarioSoap.getStockByLocation(stockFilterUbicacion, page, 10);
+                } else {
+                    stockData = await window.inventarioSoap.getAllStock(page, 10);
+                }
             }
             
             if (!stockData || !stockData.stockItems || !stockData.stockItems.stockItem) {
@@ -605,7 +651,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!select && !stockUbicacionSelect) return;
             
-            // Obtener ubicaciones
+            // Obtener ubicaciones usando la API SOAP
             const ubicaciones = await window.inventarioSoap.getAllLocations();
             
             if (!ubicaciones || !ubicaciones.ubicaciones || !ubicaciones.ubicaciones.ubicacion) {
@@ -665,7 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mantener la primera opción (placeholder)
             const firstOption = select.options[0];
             
-            // Obtener productos
+            // Obtener productos usando API REST
             const response = await fetchAPI('/productos?limit=100');
             
             if (!response || !response.productos) {
@@ -693,13 +739,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('stockId').value = '';
         document.getElementById('stockProducto').disabled = false;
         document.getElementById('stockUbicacion').disabled = false;
+        document.getElementById('divStockMotivo').style.display = 'block'; // Mostrar motivo para nuevos registros
     }
     
     async function editStock(id) {
         try {
             showSpinner();
             
-            // Obtener datos del stock
+            // Obtener datos del stock usando la API SOAP
             const allStockData = await window.inventarioSoap.getAllStock(1, 100);
             
             if (!allStockData || !allStockData.stockItems || !allStockData.stockItems.stockItem) {
@@ -750,7 +797,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             showSpinner();
             
-            // Obtener datos del stock
+            // Obtener datos del stock usando la API SOAP
             const allStockData = await window.inventarioSoap.getAllStock(1, 100);
             
             if (!allStockData || !allStockData.stockItems || !allStockData.stockItems.stockItem) {
@@ -807,7 +854,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mostrar indicador de carga
             showSpinner();
             
-            // Verificar si ya existe stock para este producto/ubicación
+            // Verificar si ya existe stock para este producto/ubicación usando la API SOAP
             const stockData = await window.inventarioSoap.getProductStock(productoId);
             
             if (stockData && stockData.stockItems && stockData.stockItems.stockItem) {
@@ -864,59 +911,67 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.show();
     }
     
-    async function saveStock() {
+async function saveStock() {
+    try {
+        // Obtener valores del formulario
+        const stockId = document.getElementById('stockId').value;
+        const productoId = document.getElementById('stockProducto').value;
+        const ubicacionId = document.getElementById('stockUbicacion').value;
+        const cantidad = parseInt(document.getElementById('stockCantidad').value);
+        const stockMinimo = parseInt(document.getElementById('stockMinimo').value);
+        const stockMaximo = parseInt(document.getElementById('stockMaximo').value);
+        const motivo = document.getElementById('stockMotivo').value;
+        const descripcion = document.getElementById('stockDescripcion').value;
+        
+        // Validaciones
+        if (!productoId) {
+            showAlert('Debe seleccionar un producto', 'danger');
+            return;
+        }
+        
+        if (!ubicacionId) {
+            showAlert('Debe seleccionar una ubicación', 'danger');
+            return;
+        }
+        
+        if (isNaN(cantidad) || cantidad < 0) {
+            showAlert('La cantidad debe ser un número mayor o igual a cero', 'danger');
+            return;
+        }
+        
+        if (isNaN(stockMinimo) || stockMinimo < 0) {
+            showAlert('El stock mínimo debe ser un número mayor o igual a cero', 'danger');
+            return;
+        }
+        
+        if (isNaN(stockMaximo) || stockMaximo < 0) {
+            showAlert('El stock máximo debe ser un número mayor o igual a cero', 'danger');
+            return;
+        }
+        
+        if (stockMinimo > stockMaximo) {
+            showAlert('El stock mínimo no puede ser mayor al máximo', 'danger');
+            return;
+        }
+        
+        // Deshabilitar botón para evitar doble envío
+        const saveButton = document.getElementById('btnGuardarStock');
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+        
+        showSpinner();
+        
         try {
-            // Obtener valores del formulario
-            const stockId = document.getElementById('stockId').value;
-            const productoId = document.getElementById('stockProducto').value;
-            const ubicacionId = document.getElementById('stockUbicacion').value;
-            const cantidad = parseInt(document.getElementById('stockCantidad').value);
-            const stockMinimo = parseInt(document.getElementById('stockMinimo').value);
-            const stockMaximo = parseInt(document.getElementById('stockMaximo').value);
-            const motivo = document.getElementById('stockMotivo').value;
-            const descripcion = document.getElementById('stockDescripcion').value;
-            
-            // Validaciones
-            if (!productoId) {
-                showAlert('Debe seleccionar un producto', 'danger');
-                return;
-            }
-            
-            if (!ubicacionId) {
-                showAlert('Debe seleccionar una ubicación', 'danger');
-                return;
-            }
-            
-            if (isNaN(cantidad) || cantidad < 0) {
-                showAlert('La cantidad debe ser un número mayor o igual a cero', 'danger');
-                return;
-            }
-            
-            if (isNaN(stockMinimo) || stockMinimo < 0) {
-                showAlert('El stock mínimo debe ser un número mayor o igual a cero', 'danger');
-                return;
-            }
-            
-            if (isNaN(stockMaximo) || stockMaximo < 0) {
-                showAlert('El stock máximo debe ser un número mayor o igual a cero', 'danger');
-                return;
-            }
-            
-            if (stockMinimo > stockMaximo) {
-                showAlert('El stock mínimo no puede ser mayor al máximo', 'danger');
-                return;
-            }
-            
-            showSpinner();
-            
             // Si estamos editando min/max o es un registro nuevo sin ajuste
             if (stockId && document.getElementById('divStockMotivo').style.display === 'none') {
-                // Actualizar mínimo/máximo
+                // Actualizar mínimo/máximo usando la API SOAP
                 const minMaxResult = await window.inventarioSoap.updateStockMinMax(stockId, stockMinimo, stockMaximo);
                 
                 if (minMaxResult && minMaxResult.error) {
                     showAlert('Error al actualizar mínimo/máximo: ' + minMaxResult.error, 'danger');
                     hideSpinner();
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = 'Guardar';
                     return;
                 }
                 
@@ -927,21 +982,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert('Stock mínimo y máximo actualizados correctamente', 'success');
                 
                 // Recargar datos
-                loadStock(currentStockPage);
+                await loadStock(currentStockPage);
+                
+                // También actualizar la vista de productos si el stock cambió
+                await loadProductos(currentProductPage);
             } else {
                 // Si hay stock existente, obtener la cantidad actual
                 let cantidadAnterior = 0;
+                let stockItemId = null;
+                
                 if (stockId) {
                     try {
-                        const allStockData = await window.inventarioSoap.getAllStock(1, 100);
-                        if (allStockData && allStockData.stockItems && allStockData.stockItems.stockItem) {
-                            const stockItems = Array.isArray(allStockData.stockItems.stockItem) 
-                                ? allStockData.stockItems.stockItem
-                                : [allStockData.stockItems.stockItem];
+                        const stockData = await window.inventarioSoap.getProductStock(productoId);
+                        if (stockData && stockData.stockItems && stockData.stockItems.stockItem) {
+                            const stockItems = Array.isArray(stockData.stockItems.stockItem) 
+                                ? stockData.stockItems.stockItem 
+                                : [stockData.stockItems.stockItem];
                             
                             const stockItem = stockItems.find(item => item.id == stockId);
                             if (stockItem) {
-                                cantidadAnterior = stockItem.cantidad;
+                                cantidadAnterior = parseInt(stockItem.cantidad) || 0;
+                                stockItemId = stockItem.id;
                             }
                         }
                     } catch (error) {
@@ -949,22 +1010,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                // Si la cantidad ha cambiado o es un nuevo registro, registrar ajuste
+                // Si la cantidad ha cambiado o es un nuevo registro, registrar ajuste usando la API SOAP
                 if (cantidad !== cantidadAnterior || !stockId) {
                     if (!motivo && document.getElementById('divStockMotivo').style.display !== 'none') {
                         showAlert('Debe seleccionar un motivo para el ajuste', 'danger');
                         hideSpinner();
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = 'Guardar';
                         return;
                     }
                     
                     const ajusteData = {
-                        producto_id: productoId,
-                        ubicacion_id: ubicacionId,
-                        cantidad_anterior: cantidadAnterior,
-                        cantidad_nueva: cantidad,
-                        motivo: motivo || 'Ajuste manual',
-                        descripcion: descripcion || 'Ajuste desde formulario de stock'
-                    };
+                    producto_id: productoId,
+                    ubicacion_id: ubicacionId,
+                    cantidad_nueva: cantidad,
+                    motivo: motivo || 'Ajuste manual', 
+                    descripcion: descripcion || 'Ajuste desde formulario de stock'
+                };
                     
                     console.log('Registrando ajuste de stock:', ajusteData);
                     
@@ -973,17 +1035,43 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (ajusteResult && ajusteResult.error) {
                         showAlert('Error al ajustar stock: ' + ajusteResult.error, 'danger');
                         hideSpinner();
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = 'Guardar';
                         return;
+                    }
+                    
+                    console.log('Resultado del ajuste:', ajusteResult);
+                    
+                    // Si el ajuste se registró correctamente, obtener el ID del stock actualizado o creado
+                    if (!stockItemId) {
+                        // Buscar el ID del stock recién creado
+                        try {
+                            const newStockData = await window.inventarioSoap.getProductStock(productoId);
+                            if (newStockData && newStockData.stockItems && newStockData.stockItems.stockItem) {
+                                const stockItems = Array.isArray(newStockData.stockItems.stockItem) 
+                                    ? newStockData.stockItems.stockItem 
+                                    : [newStockData.stockItems.stockItem];
+                                
+                                const stockItem = stockItems.find(item => item.ubicacion_id == ubicacionId);
+                                if (stockItem) {
+                                    stockItemId = stockItem.id;
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error al obtener ID del nuevo stock:', error);
+                        }
                     }
                 }
                 
-                // Si hay ID de stock, actualizar mínimo/máximo
-                if (stockId) {
-                    const minMaxResult = await window.inventarioSoap.updateStockMinMax(stockId, stockMinimo, stockMaximo);
+                // Si hay ID de stock, actualizar mínimo/máximo usando la API SOAP
+                if (stockItemId) {
+                    const minMaxResult = await window.inventarioSoap.updateStockMinMax(stockItemId, stockMinimo, stockMaximo);
                     
                     if (minMaxResult && minMaxResult.error) {
                         showAlert('Error al actualizar mínimo/máximo: ' + minMaxResult.error, 'danger');
                         hideSpinner();
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = 'Guardar';
                         return;
                     }
                 }
@@ -995,16 +1083,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert('Stock actualizado correctamente', 'success');
                 
                 // Recargar datos
-                loadStock(currentStockPage);
+                await loadStock(currentStockPage);
+                
+                // También actualizar la vista de productos si el stock cambió
+                await loadProductos(currentProductPage);
             }
-            
-            hideSpinner();
         } catch (error) {
-            console.error('Error al guardar stock:', error);
+            console.error('Error general durante el proceso de guardado:', error);
             showAlert('Error al guardar stock: ' + error.message, 'danger');
+        } finally {
+            // Habilitar botón de nuevo
+            saveButton.disabled = false;
+            saveButton.innerHTML = 'Guardar';
             hideSpinner();
         }
+    } catch (error) {
+        console.error('Error al procesar el formulario:', error);
+        showAlert('Error al guardar stock: ' + error.message, 'danger');
+        hideSpinner();
+        
+        // Asegurar que el botón vuelva a su estado original
+        const saveButton = document.getElementById('btnGuardarStock');
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.innerHTML = 'Guardar';
+        }
     }
+}
     
     // ********** SECCIÓN DE CATEGORÍAS **********
     async function initCategoriasSection() {
@@ -1065,7 +1170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const tablaCategorias = document.getElementById('tablaCategorias');
             tablaCategorias.innerHTML = '<tr><td colspan="5" class="text-center">Cargando categorías...</td></tr>';
             
-            // Obtener categorías
+            // Obtener categorías usando la API REST
             const categorias = await getCategorias();
             
             if (!categorias || !categorias.length) {
