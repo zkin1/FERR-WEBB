@@ -1,4 +1,3 @@
-// Función unificada para crear enlaces a categorías
 function createCategoryUrl(categoriaId) {
     // Si ya estamos en la página de categorías, solo cambiar el parámetro
     if (window.location.pathname.includes('categorias.html')) {
@@ -128,6 +127,47 @@ function mostrarCategoriasDeMuestraBootstrap() {
     });
 }
 
+// Función para agregar al carrito (respaldo si la global no está disponible)
+function addToCartFallback(product) {
+    console.log('Usando método de respaldo para agregar al carrito');
+    
+    // Obtener carrito actual de localStorage
+    let cart = JSON.parse(localStorage.getItem('carrito')) || { items: [], total: 0 };
+    
+    // Verificar si el producto ya existe
+    const existingItemIndex = cart.items.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex >= 0) {
+        // Actualizar cantidad si ya existe
+        cart.items[existingItemIndex].cantidad += product.cantidad;
+        cart.items[existingItemIndex].subtotal = cart.items[existingItemIndex].precio * cart.items[existingItemIndex].cantidad;
+    } else {
+        // Añadir nuevo producto
+        cart.items.push({
+            ...product,
+            subtotal: product.precio * product.cantidad
+        });
+    }
+    
+    // Recalcular total
+    cart.total = cart.items.reduce((sum, item) => sum + (item.subtotal || item.precio * item.cantidad), 0);
+    
+    // Guardar en localStorage
+    localStorage.setItem('carrito', JSON.stringify(cart));
+    
+    // Actualizar contador del carrito
+    if (typeof window.updateCartCount === 'function') {
+        window.updateCartCount();
+    } else {
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+            // Calcular cantidad total de productos
+            const itemCount = cart.items.reduce((sum, item) => sum + (item.cantidad || 0), 0);
+            cartCount.textContent = itemCount;
+        }
+    }
+}
+
 // Función para mostrar productos de una categoría
 async function mostrarProductosCategoriaBootstrap(categoriaId) {
     console.log("Mostrando productos para categoría ID:", categoriaId);
@@ -242,12 +282,26 @@ async function mostrarProductosCategoriaBootstrap(categoriaId) {
                         cantidad: 1
                     };
                     
-                    if (typeof addToCart === 'function') {
+                    console.log('Intentando agregar producto al carrito:', productData.nombre);
+                    
+                    // Verificar si la función está disponible en el objeto window
+                    if (typeof window.addToCart === 'function') {
+                        console.log('Función window.addToCart disponible, usándola');
+                        window.addToCart(productData);
+                    } else if (typeof addToCart === 'function') {
+                        console.log('Función addToCart disponible, usándola');
                         addToCart(productData);
-                        showToast('Producto agregado al carrito');
                     } else {
-                        console.error("Función addToCart no disponible");
-                        alert("Producto agregado al carrito");
+                        console.error("Función addToCart no disponible, usando respaldo");
+                        // Usar función de respaldo
+                        addToCartFallback(productData);
+                    }
+                    
+                    // Mostrar notificación - usar la función global si está disponible
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('Producto agregado al carrito', 'success');
+                    } else {
+                        showToast('Producto agregado al carrito');
                     }
                 });
             }
@@ -333,6 +387,38 @@ function mostrarProductosEjemploPorCategoria(categoriaId, container) {
         `;
         
         container.appendChild(col);
+        
+        // Agregar evento al botón
+        const addButton = col.querySelector('.add-to-cart');
+        if (addButton) {
+            addButton.addEventListener('click', function() {
+                const productData = {
+                    id: this.dataset.id,
+                    nombre: this.dataset.nombre,
+                    precio: parseFloat(this.dataset.precio),
+                    imagen: this.dataset.imagen,
+                    cantidad: 1
+                };
+                
+                // Verificar si la función está disponible en el objeto window
+                if (typeof window.addToCart === 'function') {
+                    window.addToCart(productData);
+                } else if (typeof addToCart === 'function') {
+                    addToCart(productData);
+                } else {
+                    console.error("Función addToCart no disponible, usando respaldo");
+                    // Usar función de respaldo
+                    addToCartFallback(productData);
+                }
+                
+                // Mostrar notificación - usar la función global si está disponible
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Producto agregado al carrito', 'success');
+                } else {
+                    showToast('Producto agregado al carrito');
+                }
+            });
+        }
     });
     
     // Botón para volver
@@ -396,8 +482,15 @@ function showToast(message) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado - Inicializando categorias.html');
     
+    // Verificar si las funciones del carrito están disponibles
+    console.log('Verificando disponibilidad de funciones:');
+    console.log(' - addToCart:', typeof window.addToCart === 'function' ? 'Disponible ✓' : 'No disponible ✗');
+    console.log(' - updateCartCount:', typeof window.updateCartCount === 'function' ? 'Disponible ✓' : 'No disponible ✗');
+    
     // Inicializar el contador del carrito si existe la función
-    if (typeof updateCartCount === 'function') {
+    if (typeof window.updateCartCount === 'function') {
+        window.updateCartCount();
+    } else if (typeof updateCartCount === 'function') {
         updateCartCount();
     }
     

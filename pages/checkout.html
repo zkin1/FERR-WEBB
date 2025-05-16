@@ -1,0 +1,404 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - FERREMAS</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    
+    <style>
+        .checkout-header {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .checkout-steps {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        
+        .checkout-step {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .checkout-step.active {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .checkout-step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 50%;
+            height: 2px;
+            background-color: #dee2e6;
+            transform: translateY(-50%);
+        }
+        
+        .checkout-step:not(:first-child):before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 50%;
+            height: 2px;
+            background-color: #dee2e6;
+            transform: translateY(-50%);
+        }
+        
+        .checkout-step.active:after,
+        .checkout-step.active:before {
+            background-color: #0d6efd;
+        }
+        
+        .checkout-step-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            margin-bottom: 10px;
+        }
+        
+        .checkout-step.active .checkout-step-icon {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+        
+        .cart-summary {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .cart-summary h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .cart-summary-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+        
+        .cart-summary-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        /* Spinner para carga */
+        .checkout-loader {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .checkout-loader p {
+            margin-bottom: 15px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #0d6efd;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header/Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default.jpg'">
+                <span class="fw-bold">FERREMAS</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/categorias.html">
+                            <i class="fas fa-th-large me-1"></i> Categorías
+                        </a>
+                    </li>
+                </ul>
+                <form class="d-flex me-2">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Botones de autenticación para usuarios no autenticados -->
+                <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
+                    <a href="/pages/login.html" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="/pages/register.html" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                </div>
+
+                <!-- Menú para usuarios autenticados -->
+                <div class="user-dropdown dropdown ms-2 me-2" id="user-menu" style="display: none !important;">
+                    <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
+                <a href="/cart.html" class="btn btn-outline-light position-relative">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Encabezado del checkout -->
+    <div class="checkout-header py-4">
+        <div class="container">
+            <h1 class="mb-4"><i class="fas fa-shopping-bag me-2"></i> Checkout</h1>
+            
+            <!-- Pasos del checkout -->
+            <div class="checkout-steps">
+                <div class="checkout-step active">
+                    <div class="checkout-step-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>Datos de Envío</div>
+                </div>
+                <div class="checkout-step">
+                    <div class="checkout-step-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div>Pago</div>
+                </div>
+                <div class="checkout-step">
+                    <div class="checkout-step-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>Confirmación</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido del checkout -->
+    <section class="py-5">
+        <div class="container checkout-container">
+            <div id="checkout-error" class="alert alert-danger" style="display: none;"></div>
+            <div class="checkout-loader" style="display: none;">
+                <p>Procesando...</p>
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="row">
+                <!-- Formulario de datos de envío -->
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light py-3">
+                            <h3 class="mb-0 fw-bold">Información de Envío</h3>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="checkout-form">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombre" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="apellido" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="apellido" name="apellido" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="telefono" class="form-label">Teléfono</label>
+                                        <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="direccion" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="direccion" name="direccion" required>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="ciudad" class="form-label">Ciudad</label>
+                                        <input type="text" class="form-control" id="ciudad" name="ciudad" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="region" class="form-label">Región</label>
+                                        <select class="form-select" id="region" name="region" required>
+                                            <option value="">Seleccionar...</option>
+                                            <option value="Metropolitana">Metropolitana</option>
+                                            <option value="Valparaíso">Valparaíso</option>
+                                            <option value="Biobío">Biobío</option>
+                                            <!-- Agregar más regiones -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="codigo_postal" class="form-label">Código Postal</label>
+                                        <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" required>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h4 class="mb-3">Método de Envío</h4>
+                                <div class="my-3">
+                                    <div class="form-check">
+                                        <input id="envio_normal" name="metodo_envio" type="radio" class="form-check-input" value="normal" checked required>
+                                        <label class="form-check-label" for="envio_normal">Envío Normal (3-5 días hábiles) - $3.990</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input id="envio_express" name="metodo_envio" type="radio" class="form-check-input" value="express" required>
+                                        <label class="form-check-label" for="envio_express">Envío Express (1-2 días hábiles) - $5.990</label>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="terminos" required>
+                                    <label class="form-check-label" for="terminos">
+                                        Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a>
+                                    </label>
+                                </div>
+                                
+                                <button class="btn btn-primary btn-lg w-100 checkout-btn" type="submit">
+                                    Continuar al Pago <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resumen del pedido -->
+                <div class="col-lg-4">
+                    <div class="cart-summary sticky-top" style="top: 100px;">
+                        <h3>Resumen del pedido</h3>
+                        <div id="cart-summary">
+                            <!-- Aquí se cargará dinámicamente el resumen del carrito -->
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <h5>Métodos de pago disponibles</h5>
+                            <div class="d-flex gap-2 mt-2">
+                                <i class="fab fa-cc-visa fa-2x text-muted"></i>
+                                <i class="fab fa-cc-mastercard fa-2x text-muted"></i>
+                                <i class="fab fa-cc-amex fa-2x text-muted"></i>
+                                <img src="/assets/images/webpay-logo.png" alt="WebPay" height="32" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>Enlaces</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Ofertas</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Dirección: Av. Principal 123, Santiago</p>
+                    <p><i class="fas fa-phone me-2"></i> Teléfono: +56 2 2345 6789</p>
+                    <p><i class="fas fa-envelope me-2"></i> Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contenedor para toasts -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts propios -->
+    <script src="/assets/js/config.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/userApi.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/carrito.js"></script>
+    <script src="/assets/js/checkout.js"></script>
+</body>
+</html>

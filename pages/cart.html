@@ -1,97 +1,411 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras - FERREMAS</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/header.css">
-    <link rel="stylesheet" href="assets/css/footer.css">
-    <link rel="stylesheet" href="assets/css/cart.css">
+    <title>Mi Carrito - FERREMAS</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    <link rel="stylesheet" href="/assets/css/cart.css">
+    
+    <style>
+        .cart-header {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .cart-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .cart-table th {
+            padding: 15px;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .cart-table td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .product-info img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #dee2e6;
+            padding: 5px;
+            background-color: white;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            height: 32px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            margin: 0 5px;
+        }
+        
+        .quantity-input::-webkit-inner-spin-button, 
+        .quantity-input::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+        
+        .remove-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .cart-summary {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .cart-summary h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .cart-total {
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .empty-cart p {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 767.98px) {
+            .product-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .product-info img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .cart-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .cart-table thead {
+                display: none;
+            }
+            
+            .cart-table, .cart-table tbody, .cart-table tr, .cart-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            .cart-table tr {
+                margin-bottom: 20px;
+                border: 1px solid #dee2e6;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            
+            .cart-table td {
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                border-bottom: none;
+                border-top: 1px solid #eee;
+            }
+            
+            .cart-table td:before {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                width: 45%;
+                white-space: nowrap;
+                font-weight: bold;
+                text-align: left;
+            }
+            
+            .cart-table td:nth-of-type(1):before { content: "Producto:"; }
+            .cart-table td:nth-of-type(2):before { content: "Precio:"; }
+            .cart-table td:nth-of-type(3):before { content: "Cantidad:"; }
+            .cart-table td:nth-of-type(4):before { content: "Subtotal:"; }
+            .cart-table td:nth-of-type(5):before { content: "Acciones:"; }
+            
+            .product-info {
+                text-align: right;
+            }
+            
+            .cart-summary {
+                margin-top: 30px;
+            }
+        }
+        
+        .cart-loader {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .cart-loader p {
+            margin-bottom: 15px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #0d6efd;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
+    <!-- Header/Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
         <div class="container">
-            <div class="logo">
-                <img src="assets/images/logo.png" alt="FERREMAS">
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="./index.html">Inicio</a></li>
-                    <li><a href="categorias.html">Categorías</a></li>
-                    <li><a href="#">Ofertas</a></li>
-                    <li><a href="#">Contacto</a></li>
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default.jpg'">
+                <span class="fw-bold">FERREMAS</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/categorias.html">
+                            <i class="fas fa-th-large me-1"></i> Categorías
+                        </a>
+                    </li>
                 </ul>
-            </nav>
-            <div class="cart-icon">
-                <a href="carrito.html">
-                    <span class="icon">🛒</span>
-                    <span class="cart-count" id="cart-count">0</span>
+                <form class="d-flex me-2">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
+                    <a href="/pages/login.html" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="/pages/register.html" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                </div>
+
+                <div class="user-dropdown dropdown ms-2 me-2" id="user-menu" style="display: none !important;">
+                    <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
+                <a href="/cart.html" class="btn btn-outline-light position-relative active">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
                 </a>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
+    <div class="cart-header py-4">
         <div class="container">
-            <ul>
-                <li><a href="./index.html">Inicio</a></li>
-                <li><span>Carrito de Compras</span></li>
-            </ul>
+            <h1 class="mb-0"><i class="fas fa-shopping-cart me-2"></i> Mi Carrito</h1>
         </div>
     </div>
 
-    <!-- Contenido del Carrito -->
-    <section class="cart-section">
+    <section class="py-5">
         <div class="container">
-            <h1>Carrito de Compras</h1>
-            <div id="cart-items">
-                <!-- El contenido del carrito se cargará dinámicamente aquí -->
-            </div>
-            <div class="cart-summary">
-                <div class="total">
-                    <span>Total:</span>
-                    <span id="cart-total">$0</span>
+            <div class="row">
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    <div id="cart-items">
+                        <div class="cart-loader">
+                            <p>Cargando carrito...</p>
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="cart-summary">
+                        <h3>Resumen del pedido</h3>
+                        <div class="cart-summary-row">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">$0</span>
+                        </div>
+                        <div class="cart-summary-row">
+                            <span>Envío</span>
+                            <span id="cart-shipping">Calculado en el siguiente paso</span>
+                        </div>
+                        <div class="cart-summary-row cart-total">
+                            <span>Total</span>
+                            <span id="cart-total">$0</span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button id="checkout-button" class="btn btn-primary w-100 py-2 cart-btn">
+                                <i class="fas fa-lock me-2"></i>Proceder al pago
+                            </button>
+                            
+                            <div class="text-center mt-3 mb-3">
+                                <span class="text-muted">- o -</span>
+                            </div>
+                            
+                            <a href="/index.html" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>Continuar comprando
+                            </a>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <h5>Métodos de pago aceptados</h5>
+                            <div class="d-flex gap-2 mt-2">
+                                <i class="fab fa-cc-visa fa-2x text-muted"></i>
+                                <i class="fab fa-cc-mastercard fa-2x text-muted"></i>
+                                <i class="fab fa-cc-amex fa-2x text-muted"></i>
+                                <img src="/assets/images/webpay-logo.png" alt="WebPay" height="32" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
+    <footer class="bg-dark text-white py-5">
         <div class="container">
-            <div class="footer-columns">
-                <div class="footer-column">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
                     <h3>FERREMAS</h3>
                     <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
                 </div>
-                <div class="footer-column">
+                <div class="col-md-4 mb-4 mb-md-0">
                     <h3>Enlaces</h3>
-                    <ul>
-                        <li><a href="./index.html">Inicio</a></li>
-                        <li><a href="categorias.html">Categorías</a></li>
-                        <li><a href="#">Ofertas</a></li>
-                        <li><a href="#">Contacto</a></li>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Ofertas</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Contacto</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
+                <div class="col-md-4">
                     <h3>Contacto</h3>
-                    <p>Dirección: Av. Principal 123, Santiago</p>
-                    <p>Teléfono: +56 2 2345 6789</p>
-                    <p>Email: info@ferremas.cl</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Dirección: Av. Principal 123, Santiago</p>
+                    <p><i class="fas fa-phone me-2"></i> Teléfono: +56 2 2345 6789</p>
+                    <p><i class="fas fa-envelope me-2"></i> Email: info@ferremas.cl</p>
                 </div>
             </div>
-            <div class="copyright">
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
                 <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <template id="toast-template">
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto toast-title">Notificación</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </template>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/config.js"></script>
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/carrito.js"></script>
-    
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/userApi.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/carrito.js"></script>
 </body>
-</html>
