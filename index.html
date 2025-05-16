@@ -148,6 +148,31 @@
                         </button>
                     </div>
                 </form>
+                
+                <!-- Botones de autenticación para usuarios no autenticados -->
+                <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
+                    <a href="/pages/login.html" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="/pages/register.html" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                </div>
+
+                <!-- Menú para usuarios autenticados -->
+                <div class="user-dropdown dropdown ms-2 me-2" id="user-menu" style="display: none !important;">
+                    <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
                 <a href="/cart.html" class="btn btn-outline-light position-relative">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
@@ -201,71 +226,8 @@
                     </div>
                 </div>
                 
-                <!-- Producto 2 -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm product-card">
-                        <div class="text-center p-3">
-                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Destornillador Eléctrico" style="height: 150px; object-fit: contain;">
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=2" class="text-decoration-none">Destornillador Eléctrico</a>
-                            </h5>
-                            <p class="card-text text-muted small">Código: DEST001</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <span class="fw-bold text-primary">$19.990</span>
-                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="2" data-nombre="Destornillador Eléctrico" data-precio="19990" data-imagen="/assets/images/default.jpg">
-                                    <i class="fas fa-cart-plus"></i> Agregar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Otros productos... -->
                 
-                <!-- Producto 3 -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm product-card">
-                        <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-success">Nuevo</span>
-                        </div>
-                        <div class="text-center p-3">
-                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Sierra Circular" style="height: 150px; object-fit: contain;">
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=3" class="text-decoration-none">Sierra Circular</a>
-                            </h5>
-                            <p class="card-text text-muted small">Código: SIER001</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <span class="fw-bold text-primary">$89.990</span>
-                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="3" data-nombre="Sierra Circular" data-precio="89990" data-imagen="/assets/images/default.jpg">
-                                    <i class="fas fa-cart-plus"></i> Agregar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Producto 4 -->
-                <div class="col">
-                    <div class="card h-100 shadow-sm product-card">
-                        <div class="text-center p-3">
-                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Cemento 25kg" style="height: 150px; object-fit: contain;">
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="/product-detail.html?id=4" class="text-decoration-none">Cemento 25kg</a>
-                            </h5>
-                            <p class="card-text text-muted small">Código: CEM001</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <span class="fw-bold text-primary">$5.990</span>
-                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="4" data-nombre="Cemento 25kg" data-precio="5990" data-imagen="/assets/images/default.jpg">
-                                    <i class="fas fa-cart-plus"></i> Agregar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <div class="text-center mt-4">
@@ -283,110 +245,7 @@
             <p class="text-center text-muted mb-5">Encuentra todo lo que necesitas para tu proyecto</p>
             
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="categories-container">
-                <!-- Categoría 1 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #007bff, #00c3ff);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-tools fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas</h3>
-                                <p class="mb-0 opacity-75">Todo tipo de herramientas para profesionales y aficionados</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=1" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 2 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #28a745, #7fd858);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-hammer fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas Manuales</h3>
-                                <p class="mb-0 opacity-75">Martillos, destornilladores, llaves y mucho más</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=2" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 3 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #fd7e14, #ffb84d);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-bolt fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas Eléctricas</h3>
-                                <p class="mb-0 opacity-75">Taladros, sierras eléctricas y equipos de alta potencia</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=3" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 4 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #6f42c1, #a885e0);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-building fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Materiales de Construcción</h3>
-                                <p class="mb-0 opacity-75">Cemento, ladrillos, madera y todos los materiales que necesitas</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=4" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 5 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #ffc107, #ffe066);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-cogs fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Ferretería General</h3>
-                                <p class="mb-0 opacity-75">Tornillos, tuercas, clavos y todo tipo de accesorios</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=5" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Categorías... -->
             </div>
         </div>
     </section>
@@ -421,161 +280,20 @@
         </div>
     </footer>
 
+    <!-- Contenedor para toasts -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Scripts propios -->
     <script src="/assets/js/config.js"></script>
     <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/userApi.js"></script>
+    <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/categorias.js"></script>
     <script src="/assets/js/productos.js"></script>
     <script src="/assets/js/carrito.js"></script>
-    <!-- Script para actualizar createProductCard con Bootstrap -->
-    <script>
-        // Sobreescribir la función createProductCard para usar Bootstrap
-        function createProductCard(producto) {
-            // Crear elemento principal
-            const card = document.createElement('div');
-            card.className = 'col';
-            
-            // Usar ruta simple y directa
-            const productDetailUrl = `/product-detail.html?id=${producto.id}`;
-            
-            // Usar rutas simples para imágenes
-            const imageUrl = `/assets/images/default.jpg`;
-            
-            // HTML interno del card con Bootstrap
-            card.innerHTML = `
-                <div class="card h-100 shadow-sm product-card">
-                    <div class="text-center p-3">
-                        <img src="${imageUrl}" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;">
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">
-                            <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
-                        </h5>
-                        <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            ${producto.precio_oferta ? 
-                                `<div>
-                                    <span class="text-decoration-line-through text-muted me-1">$${formatPrice(producto.precio)}</span>
-                                    <span class="fw-bold text-danger">$${formatPrice(producto.precio_oferta)}</span>
-                                </div>` : 
-                                `<span class="fw-bold text-primary">$${formatPrice(producto.precio)}</span>`
-                            }
-                            <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio_oferta || producto.precio}" data-imagen="${imageUrl}">
-                                <i class="fas fa-cart-plus"></i> Agregar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Agregar evento al botón de agregar al carrito
-            const addButton = card.querySelector('.add-to-cart');
-            addButton.addEventListener('click', function() {
-                const productData = {
-                    id: this.dataset.id,
-                    nombre: this.dataset.nombre,
-                    precio: parseFloat(this.dataset.precio),
-                    imagen: this.dataset.imagen,
-                    cantidad: 1
-                };
-                
-                addToCart(productData);
-                showToast('Producto agregado al carrito');
-            });
-            
-            return card;
-        }
-        
-        // Función para formatear precios
-        function formatPrice(price) {
-            return new Intl.NumberFormat('es-CL').format(price);
-        }
-        
-        // Función para mostrar toast de Bootstrap en lugar de alertas
-        function showToast(message) {
-            // Crear toast container si no existe
-            let toastContainer = document.getElementById('toast-container');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toast-container';
-                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                document.body.appendChild(toastContainer);
-            }
-            
-            // Crear el toast
-            const toastId = 'toast-' + Date.now();
-            const toast = document.createElement('div');
-            toast.id = toastId;
-            toast.className = 'toast align-items-center text-white bg-success border-0';
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="fas fa-check-circle me-2"></i>${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            // Inicializar y mostrar el toast
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Eliminar el toast después de ocultarse
-            toast.addEventListener('hidden.bs.toast', function() {
-                this.remove();
-            });
-        }
-        
-        // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar el contador de carrito
-            updateCartCount();
-            
-            // Agregar evento a los botones de agregar al carrito
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const productData = {
-                        id: this.dataset.id,
-                        nombre: this.dataset.nombre,
-                        precio: parseFloat(this.dataset.precio),
-                        imagen: this.dataset.imagen,
-                        cantidad: 1
-                    };
-                    
-                    addToCart(productData);
-                    showToast('Producto agregado al carrito');
-                });
-            });
-            
-            // Intentar cargar productos destacados a través de la API
-            try {
-                if (typeof getProductosDestacados === 'function') {
-                    getProductosDestacados(4).then(function(productos) {
-                        const featuredContainer = document.getElementById('featured-products');
-                        if (featuredContainer && productos && productos.length > 0) {
-                            featuredContainer.innerHTML = '';
-                            productos.forEach(function(producto) {
-                                featuredContainer.appendChild(createProductCard(producto));
-                            });
-                        }
-                    }).catch(function(error) {
-                        console.log('Error al cargar productos destacados:', error);
-                    });
-                }
-            } catch (error) {
-                console.log('No se pudieron cargar productos dinámicamente, usando ejemplos');
-            }
-        });
-    </script>
 </body>
 </html>

@@ -2,14 +2,17 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
+    "node-fetch": "^2.7.0",
+    "path": "^0.12.7",
     "soap": "^1.1.11"
   },
   "name": "ferr-webb",
   "version": "1.0.0",
   "description": "��#\u0000 \u0000F\u0000E\u0000R\u0000R\u0000-\u0000W\u0000E\u0000B\u0000B\u0000\r\u0000 \u0000",
   "main": "middleware-server.js",
-  "devDependencies": {},
   "scripts": {
+    "start": "node middleware-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
