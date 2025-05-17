@@ -1,9 +1,18 @@
-// URL base de la API
-const API_URL = 'http://localhost:3000/api';
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si hay configuración
+    if (window.APP_CONFIG) {
+        // Sobrescribir la configuración con la URL correcta
+        window.APP_CONFIG.API_URL = 'http://localhost:3000/api';
+        console.log('API URL sobrescrita en APP_CONFIG:', window.APP_CONFIG.API_URL);
+    }
+    
+    // Asegurar que usamos la URL correcta
+    API_URL = 'http://localhost:3000/api';
+    console.log('API URL final:', API_URL);
+});
 
 let isFetching = false;
-
 
 function getBaseUrl() {
     // Obtener la URL completa actual
@@ -40,35 +49,53 @@ function getCategoryUrl(categoryId) {
 
 
 // Función para obtener datos de la API
-async function fetchAPI(endpoint) {
+async function fetchAPI(endpoint, options = {}) {
     try {
-        // Usar la función helper de APP_CONFIG
-        const apiUrl = window.APP_CONFIG ? 
-            window.APP_CONFIG.getApiUrl(endpoint) : 
-            '/proxy.php?target=api&path=' + encodeURIComponent(endpoint);
-            
-        console.log('Fetching:', apiUrl);
+        // Quitar la barra inicial si existe para evitar doble barra
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
         
-        const response = await fetch(apiUrl);
+        // Usar directamente la URL de la API de productos en el puerto 3000
+        const url = `${API_URL}/${cleanEndpoint}`;
+        
+        console.log('Fetching:', url);
+        
+        // Realizar la petición
+        const response = await fetch(url, options);
         
         if (!response.ok) {
+            console.error(`Error HTTP: ${response.status} - ${response.statusText}`);
             throw new Error(`Error: ${response.status}`);
         }
         
         return await response.json();
     } catch (error) {
         console.error('Error en la API:', error);
-        return endpoint.includes('productos') ? [] : {};
+        
+        // Devolver estructuras de datos de fallback según el tipo de endpoint
+        if (endpoint.includes('categorias')) {
+            return [];
+        } else if (endpoint.includes('productos')) {
+            return { productos: [], pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 0 } };
+        } else {
+            return {};
+        }
     }
 }
+
 
 // Obtener todas las categorías
 async function getCategorias() {
     try {
-        return await fetchAPI('/categorias');
+        const categorias = await fetchAPI('categorias');
+        // Verificar la respuesta para asegurar que sea un array
+        if (!Array.isArray(categorias)) {
+            console.warn('La respuesta de categorías no es un array:', categorias);
+            return []; // Devolver array vacío si no es un array
+        }
+        return categorias;
     } catch (error) {
         console.error('Error al obtener categorías:', error);
-        // Devolver datos de muestra
+        // Devolver datos de muestra para evitar errores
         return [
             { id: 1, nombre: 'Herramientas', slug: 'herramientas' },
             { id: 2, nombre: 'Herramientas Manuales', slug: 'herramientas-manuales' },
@@ -161,3 +188,23 @@ async function getMarcas() {
 async function getMarcaById(id) {
     return await fetchAPI(`/marcas/${id}`);
 }
+
+
+
+window.appAPI = {
+    fetchAPI,
+    getCategorias,
+    getCategoriaById,
+    getSubcategoriasByCategoria,
+    getProductos,
+    getProductoById,
+    getProductosByCategoria,
+    getProductosBySubcategoria,
+    getProductosDestacados,
+    getProductosNuevos,
+    buscarProductos,
+    getImagenesProducto,
+    getEspecificacionesProducto,
+    getMarcas,
+    getMarcaById
+};

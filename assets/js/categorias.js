@@ -251,7 +251,7 @@ async function mostrarProductosCategoriaBootstrap(categoriaId) {
             col.innerHTML = `
                 <div class="card h-100 shadow-sm product-card">
                     <div class="text-center p-3">
-                        <img src="/assets/images/default.jpg" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;">
+                        <img src="/assets/images/productos/${producto.codigo}.jpg" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;" onerror="this.onerror=null; this.src='/assets/images/default.jpg';">
                     </div>
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">
@@ -260,7 +260,7 @@ async function mostrarProductosCategoriaBootstrap(categoriaId) {
                         <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
                         <div class="d-flex justify-content-between align-items-center mt-auto">
                             <span class="fw-bold text-primary">$${formatPrice(producto.precio)}</span>
-                            <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="/assets/images/default.jpg">
+                            <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="/assets/images/productos/${producto.codigo}.jpg">
                                 <i class="fas fa-cart-plus"></i> Agregar
                             </button>
                         </div>
@@ -362,7 +362,7 @@ function mostrarProductosEjemploPorCategoria(categoriaId, container) {
         col.innerHTML = `
             <div class="card h-100 shadow-sm product-card">
                 <div class="text-center p-3">
-                    <img src="/assets/images/default.jpg" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;">
+                    <img src="/assets/images/productos/${producto.codigo}.jpg" class="img-fluid" alt="${producto.nombre}" style="height: 150px; object-fit: contain;" onerror="this.onerror=null; this.src='/assets/images/default.jpg';">
                 </div>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -371,7 +371,7 @@ function mostrarProductosEjemploPorCategoria(categoriaId, container) {
                     <p class="card-text text-muted small">Código: ${producto.codigo || 'N/A'}</p>
                     <div class="d-flex justify-content-between align-items-center mt-auto">
                         <span class="fw-bold text-primary">$${formatPrice(producto.precio)}</span>
-                        <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="/assets/images/default.jpg">
+                        <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}" data-imagen="/assets/images/productos/${producto.codigo}.jpg">
                             <i class="fas fa-cart-plus"></i> Agregar
                         </button>
                     </div>

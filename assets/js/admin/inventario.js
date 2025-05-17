@@ -8,6 +8,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manejar navegación por tabs/secciones
     setupTabNavigation();
+
+        if (!window.APP_CONFIG || !window.APP_CONFIG.API_URL) {
+        console.error('ERROR: APP_CONFIG no está configurado correctamente');
+        showAlert('Error en la configuración de la API. Contacte al administrador.', 'danger');
+        return;
+    }
+    
+    // Verificar acceso al proxy
+    fetch(window.APP_CONFIG.API_URL + '&path=ping')
+        .then(response => {
+            if (!response.ok) throw new Error('Error comunicando con el proxy API');
+            return response.json();
+        })
+        .then(data => {
+            console.log('Conexión con API verificada:', data);
+        })
+        .catch(error => {
+            console.error('Error verificando conexión API:', error);
+            showAlert('Error de conexión con la API. Compruebe la configuración del proxy.', 'danger');
+        });
 });
 
 // Variables para paginación

@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Productos e Inventario - FERREMAS Admin</title>
+    <title>Administración de Productos - FERREMAS Admin</title>
     
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS y Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    
+    <!-- Estilos admin (una sola referencia) -->
+    <link rel="stylesheet" href="/assets/css/admin.css" type="text/css">
+    
     <style>
         .nav-tabs .nav-link.active {
             font-weight: bold;
@@ -45,6 +48,17 @@
     </style>
 </head>
 <body>
+    <!-- Verificación de permisos admin -->
+    <script>
+    (function() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (!currentUser || currentUser.rol !== 'admin') {
+            console.error('Acceso denegado: se requieren permisos de administrador');
+            window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        }
+    })();
+    </script>
+
     <!-- Spinner para carga -->
     <div class="spinner-overlay" id="spinnerOverlay">
         <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
@@ -52,7 +66,7 @@
         </div>
     </div>
 
-    <!-- Navegación del panel admin -->
+    <!-- Navegación principal del panel admin -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/">FERREMAS Admin</a>
@@ -60,35 +74,47 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/admin/crud.html">Gestión de Productos</a>
+                        <a class="nav-link active" href="/admin/crud.html">
+                            <i class="fas fa-box me-1"></i>Productos
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/inventario.html">Inventario</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/pedidos.html">Pedidos</a>
+                        <a class="nav-link" href="/admin/inventario.html">
+                            <i class="fas fa-boxes me-1"></i>Inventario
+                        </a>
                     </li>
                 </ul>
+                <!-- Información de usuario -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i> <span id="admin-username">Administrador</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/index.html"><i class="fas fa-home me-2"></i>Ir a Tienda</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="admin-logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
 
     <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:9999;">
-    <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
-        <span class="visually-hidden">Verificando autenticación...</span>
+        <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
+            <span class="visually-hidden">Verificando autenticación...</span>
+        </div>
     </div>
-</div>
 
     <div class="container-fluid">
         <div class="row mt-3">
             <div class="col-12">
-                <h1>Gestión de Productos e Inventario</h1>
-                <p class="lead">Administre sus productos y niveles de inventario desde este panel.</p>
+                <h1>Gestión de Productos</h1>
+                <p class="lead">Administre productos, categorías y stock desde este panel.</p>
                 
                 <!-- Pestañas de navegación -->
                 <ul class="nav nav-tabs" id="adminTabs" role="tablist">
@@ -163,7 +189,6 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tablaProductos">
-                                            <!-- Los productos se cargarán dinámicamente -->
                                             <tr>
                                                 <td colspan="8" class="text-center">Cargando productos...</td>
                                             </tr>
@@ -172,9 +197,7 @@
                                 </div>
                                 
                                 <nav aria-label="Paginación de productos">
-                                    <ul class="pagination justify-content-center" id="paginacionProductos">
-                                        <!-- La paginación se generará dinámicamente -->
-                                    </ul>
+                                    <ul class="pagination justify-content-center" id="paginacionProductos"></ul>
                                 </nav>
                             </div>
                         </div>
@@ -226,7 +249,6 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tablaStock">
-                                            <!-- El stock se cargará dinámicamente -->
                                             <tr>
                                                 <td colspan="7" class="text-center">Cargando datos de stock...</td>
                                             </tr>
@@ -235,9 +257,7 @@
                                 </div>
                                 
                                 <nav aria-label="Paginación de stock">
-                                    <ul class="pagination justify-content-center" id="paginacionStock">
-                                        <!-- La paginación se generará dinámicamente -->
-                                    </ul>
+                                    <ul class="pagination justify-content-center" id="paginacionStock"></ul>
                                 </nav>
                             </div>
                         </div>
@@ -265,7 +285,6 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tablaCategorias">
-                                            <!-- Las categorías se cargarán dinámicamente -->
                                             <tr>
                                                 <td colspan="5" class="text-center">Cargando categorías...</td>
                                             </tr>
@@ -312,7 +331,6 @@
                                     <label for="productoCategoria" class="form-label">Categoría</label>
                                     <select class="form-select" id="productoCategoria" required>
                                         <option value="">Seleccione una categoría</option>
-                                        <!-- Las categorías se cargarán dinámicamente -->
                                     </select>
                                 </div>
                             </div>
@@ -338,7 +356,6 @@
                                     <label for="productoMarca" class="form-label">Marca</label>
                                     <select class="form-select" id="productoMarca">
                                         <option value="">Seleccione una marca</option>
-                                        <!-- Las marcas se cargarán dinámicamente -->
                                     </select>
                                 </div>
                             </div>
@@ -383,7 +400,6 @@
                             <label for="stockProducto" class="form-label">Producto</label>
                             <select class="form-select" id="stockProducto" required>
                                 <option value="">Seleccione un producto</option>
-                                <!-- Los productos se cargarán dinámicamente -->
                             </select>
                         </div>
                         
@@ -391,7 +407,6 @@
                             <label for="stockUbicacion" class="form-label">Ubicación</label>
                             <select class="form-select" id="stockUbicacion" required>
                                 <option value="">Seleccione una ubicación</option>
-                                <!-- Las ubicaciones se cargarán dinámicamente -->
                             </select>
                         </div>
                         
@@ -476,7 +491,6 @@
                             <label for="categoriaParent" class="form-label">Categoría Padre</label>
                             <select class="form-select" id="categoriaParent">
                                 <option value="">Ninguna (Categoría principal)</option>
-                                <!-- Las categorías se cargarán dinámicamente -->
                             </select>
                         </div>
                     </form>
@@ -489,13 +503,45 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts en el orden adecuado -->
     <script src="/assets/js/config.js"></script>
+    <script>
+    // Establecer explícitamente la URL de la API de productos
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay configuración
+        if (window.APP_CONFIG) {
+            // Sobrescribir la configuración con la URL correcta
+            window.APP_CONFIG.API_URL = 'http://localhost:3000/api';
+            console.log('API URL configurada correctamente:', window.APP_CONFIG.API_URL);
+        }
+        
+        // Mostrar nombre del usuario
+        const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const usernameDisplay = document.getElementById('admin-username');
+        if (usernameDisplay && userData.nombre) {
+            usernameDisplay.textContent = userData.nombre;
+        }
+        
+        // Configurar cierre de sesión
+        document.getElementById('admin-logout').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('userAuthToken');
+            localStorage.removeItem('currentUser');
+            document.cookie = 'authToken=; path=/; max-age=0';
+            window.location.href = '/pages/login.html';
+        });
+        
+        // Ocultar overlay de autenticación
+        const authOverlay = document.getElementById('auth-overlay');
+        if (authOverlay) {
+            authOverlay.style.display = 'none';
+        }
+    });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/inventarioSoap.js"></script>
     <script src="/assets/js/admin/crud.js"></script>
     <script src="/assets/js/auth.js"></script>
-    
 </body>
 </html>

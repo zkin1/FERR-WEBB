@@ -12,8 +12,23 @@
         ? 'http://localhost:3000/api'
         : `http://${window.location.hostname}:3000/api`,
     defaultImage: '/assets/images/default.jpg',
-    temporaryStockFix: true
+    temporaryStockFix: false
+
 };
+
+function getProductImageUrl(codigo) {
+    return `/assets/images/productos/${codigo}.jpg`;
+}
+
+    if (window.location.search.includes('logout=')) {
+        console.log('Detectado parámetro de logout, limpiando URL...');
+        
+        // Limpiar la URL para evitar bucles de redirección
+        const cleanUrl = window.location.pathname;
+        history.replaceState(null, document.title, cleanUrl);
+        
+        console.log('URL limpiada:', window.location.href);
+    }
 
     // Función principal que se ejecuta cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
@@ -111,55 +126,44 @@
     }
 
     // Función para obtener stock desde la API SOAP
-    async function getProductStock(productId) {
-        let stockInfo = { disponible: 0, ubicaciones: [] };
-        
-        try {
-            // Verificar si el objeto window.inventarioSoap existe
-            if (window.inventarioSoap && typeof window.inventarioSoap.getProductStock === 'function') {
-                const stockResult = await window.inventarioSoap.getProductStock(productId);
-                console.log('Respuesta API Stock:', stockResult);
+async function getProductStock(productId) {
+    let stockInfo = { disponible: 0, ubicaciones: [] };
+    
+    try {
+        // Verificar si el objeto window.inventarioSoap existe
+        if (window.inventarioSoap && typeof window.inventarioSoap.getProductStock === 'function') {
+            const stockResult = await window.inventarioSoap.getProductStock(productId);
+            console.log('Respuesta API Stock:', stockResult);
+            
+            if (stockResult && stockResult.stockItems && stockResult.stockItems.stockItem) {
+                const stockItems = Array.isArray(stockResult.stockItems.stockItem) ? 
+                    stockResult.stockItems.stockItem : [stockResult.stockItems.stockItem];
                 
-                if (stockResult && stockResult.stockItems && stockResult.stockItems.stockItem) {
-                    const stockItems = Array.isArray(stockResult.stockItems.stockItem) ? 
-                        stockResult.stockItems.stockItem : [stockResult.stockItems.stockItem];
-                    
-                    // Calcular stock total
-                    stockInfo.disponible = stockItems.reduce((total, item) => {
-                        return total + parseInt(item.cantidad || 0);
-                    }, 0);
-                    
-                    // Guardar ubicaciones con stock
-                    stockInfo.ubicaciones = stockItems
-                        .map(item => ({
-                            ubicacionId: item.ubicacion_id,
-                            ubicacionNombre: item.ubicacion_nombre || 'Ubicación desconocida',
-                            cantidad: parseInt(item.cantidad || 0)
-                        }))
-                        .filter(item => item.cantidad > 0);
-                }
-            } else {
-                console.warn('API de inventario no disponible, usando valores por defecto');
+                // Calcular stock total
+                stockInfo.disponible = stockItems.reduce((total, item) => {
+                    return total + parseInt(item.cantidad || 0);
+                }, 0);
+                
+                // Guardar ubicaciones con stock
+                stockInfo.ubicaciones = stockItems
+                    .map(item => ({
+                        ubicacionId: item.ubicacion_id,
+                        ubicacionNombre: item.ubicacion_nombre || 'Ubicación desconocida',
+                        cantidad: parseInt(item.cantidad || 0)
+                    }))
+                    .filter(item => item.cantidad > 0);
             }
-        } catch (error) {
-            console.error('Error al obtener stock:', error);
+        } else {
+            console.warn('API de inventario no disponible');
         }
-        
-        // Si no hay stock y está habilitado el arreglo temporal, usar valores por defecto
-        if (stockInfo.disponible === 0 && config.temporaryStockFix) {
-            console.log('Usando stock temporal predeterminado');
-            stockInfo.disponible = 10;
-            stockInfo.ubicaciones = [
-                {
-                    ubicacionId: 1,
-                    ubicacionNombre: 'Bodega principal',
-                    cantidad: 10
-                }
-            ];
-        }
-        
-        return stockInfo;
+    } catch (error) {
+        console.error('Error al obtener stock:', error);
     }
+
+    console.log('Stock real del producto:', stockInfo.disponible, 'unidades');
+    
+    return stockInfo;
+}
 
     // Función para renderizar el detalle del producto
     function renderProductDetail(container, producto, stockInfo, categoria) {
@@ -221,12 +225,12 @@
             <div class="col-md-6 mb-4">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-0">
-                        <img src="${config.defaultImage}" class="img-fluid w-100" alt="${producto.nombre}" id="main-product-image" style="max-height: 400px; object-fit: contain;">
+                        <img src="${getProductImageUrl(producto.codigo)}" class="img-fluid w-100" alt="${producto.nombre}" id="main-product-image" style="max-height: 400px; object-fit: contain;" onerror="this.onerror=null; this.src='${config.defaultImage}';">
                     </div>
                     <div class="card-footer bg-white p-3">
                         <div class="d-flex justify-content-center" id="image-thumbnails">
                             <div class="thumbnail-item active me-2" data-index="0">
-                                <img src="${config.defaultImage}" class="img-thumbnail" alt="${producto.nombre}" style="width: 60px; height: 60px; object-fit: cover;">
+                                <img src="${getProductImageUrl(producto.codigo)}" class="img-thumbnail" alt="${producto.nombre}" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.onerror=null; this.src='${config.defaultImage}';">
                             </div>
                         </div>
                     </div>
@@ -342,7 +346,7 @@
                     id: producto.id,
                     nombre: producto.nombre,
                     precio: producto.precio_oferta || producto.precio,
-                    imagen: config.defaultImage,
+                    imagen: getProductImageUrl(producto.codigo),
                     cantidad: cantidad,
                     stock: maxStock
                 };
@@ -430,7 +434,7 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-img-top" style="height: 200px;">
                             <a href="/product-detail.html?id=${producto.id}">
-                                <img src="${config.defaultImage}" class="img-fluid w-100 h-100" alt="${producto.nombre}" style="object-fit: contain;">
+                                <img src="${getProductImageUrl(producto.codigo)}" class="img-fluid w-100 h-100" alt="${producto.nombre}" style="object-fit: contain;" onerror="this.src='${config.defaultImage}'">
                             </a>
                         </div>
                         <div class="card-body d-flex flex-column">
@@ -473,7 +477,7 @@
                         id: this.dataset.id,
                         nombre: this.dataset.nombre,
                         precio: parseFloat(this.dataset.precio),
-                        imagen: config.defaultImage,
+                        imagen: getProductImageUrl(producto.codigo),
                         cantidad: 1
                     };
                     

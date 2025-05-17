@@ -5,13 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario - FERREMAS Admin</title>
     
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS y Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    
+    <!-- Estilos admin (una sola referencia) -->
+    <link rel="stylesheet" href="/assets/css/admin.css" type="text/css">
+    
+    <style>
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            box-shadow: inset -1px 0 0 rgba(0,0,0,.1);
+        }
+        .sidebar .nav-link {
+            color: #333;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            border-left-color: #ccc;
+        }
+        .sidebar .nav-link.active {
+            color: #007bff;
+            background-color: #f8f9fa;
+            border-left-color: #007bff;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navegación del panel admin -->
+    <!-- Verificación de permisos admin -->
+    <script>
+    (function() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (!currentUser || currentUser.rol !== 'admin') {
+            console.error('Acceso denegado: se requieren permisos de administrador');
+            window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        }
+    })();
+    </script>
+
+    <!-- Navegación principal del panel admin -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/admin/">FERREMAS Admin</a>
@@ -19,23 +54,38 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">    
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Dashboard</a>
+                        <a class="nav-link" href="/admin/crud.html">
+                            <i class="fas fa-box me-1"></i>Productos
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/productos.html">Productos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/admin/inventario.html">Inventario</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/pedidos.html">Pedidos</a>
+                        <a class="nav-link active" href="/admin/inventario.html">
+                            <i class="fas fa-boxes me-1"></i>Inventario
+                        </a>
                     </li>
                 </ul>
+                <!-- Información de usuario -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i> <span id="admin-username">Administrador</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/index.html"><i class="fas fa-home me-2"></i>Ir a Tienda</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="admin-logout"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
+
+    <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:9999;">
+        <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
+            <span class="visually-hidden">Verificando autenticación...</span>
+        </div>
+    </div>
 
     <div class="container-fluid">
         <div class="row">
@@ -105,7 +155,6 @@
                                 </tr>
                             </thead>
                             <tbody id="stock-table-body">
-                                <!-- Se cargará dinámicamente -->
                                 <tr>
                                     <td colspan="6" class="text-center">Cargando...</td>
                                 </tr>
@@ -113,9 +162,7 @@
                         </table>
                     </div>
                     <nav aria-label="Paginación de stock">
-                        <ul class="pagination justify-content-center" id="stock-pagination">
-                            <!-- Se cargará dinámicamente -->
-                        </ul>
+                        <ul class="pagination justify-content-center" id="stock-pagination"></ul>
                     </nav>
                 </section>
 
@@ -141,7 +188,6 @@
                                 </tr>
                             </thead>
                             <tbody id="ubicaciones-table-body">
-                                <!-- Se cargará dinámicamente -->
                                 <tr>
                                     <td colspan="6" class="text-center">Cargando...</td>
                                 </tr>
@@ -158,7 +204,6 @@
                             <div class="input-group">
                                 <select class="form-select" id="movimiento-tipo">
                                     <option value="">Todos los tipos</option>
-                                    <!-- Se cargará dinámicamente -->
                                 </select>
                                 <input type="date" class="form-control" id="movimiento-fecha">
                                 <button class="btn btn-primary" type="button" id="btn-filter-movimientos">
@@ -188,7 +233,6 @@
                                 </tr>
                             </thead>
                             <tbody id="movimientos-table-body">
-                                <!-- Se cargará dinámicamente -->
                                 <tr>
                                     <td colspan="8" class="text-center">Cargando...</td>
                                 </tr>
@@ -196,9 +240,7 @@
                         </table>
                     </div>
                     <nav aria-label="Paginación de movimientos">
-                        <ul class="pagination justify-content-center" id="movimientos-pagination">
-                            <!-- Se cargará dinámicamente -->
-                        </ul>
+                        <ul class="pagination justify-content-center" id="movimientos-pagination"></ul>
                     </nav>
                 </section>
 
@@ -225,7 +267,6 @@
                                 </tr>
                             </thead>
                             <tbody id="ajustes-table-body">
-                                <!-- Se cargará dinámicamente -->
                                 <tr>
                                     <td colspan="7" class="text-center">Cargando...</td>
                                 </tr>
@@ -233,17 +274,14 @@
                         </table>
                     </div>
                     <nav aria-label="Paginación de ajustes">
-                        <ul class="pagination justify-content-center" id="ajustes-pagination">
-                            <!-- Se cargará dinámicamente -->
-                        </ul>
+                        <ul class="pagination justify-content-center" id="ajustes-pagination"></ul>
                     </nav>
                 </section>
             </main>
         </div>
     </div>
 
-    <!-- Modales para operaciones CRUD -->
-    
+    <!-- Modales -->
     <!-- Modal para crear/editar ubicación -->
     <div class="modal fade" id="ubicacionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -278,12 +316,6 @@
                     <button type="button" class="btn btn-primary" id="btn-save-ubicacion">Guardar</button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:9999;">
-        <div class="spinner-border text-light" role="status" style="width:3rem; height:3rem;">
-            <span class="visually-hidden">Verificando autenticación...</span>
         </div>
     </div>
 
@@ -359,14 +391,12 @@
                                 <label for="movimiento-origen-id" class="form-label">Ubicación Origen</label>
                                 <select class="form-select" id="movimiento-origen-id">
                                     <option value="">Seleccione ubicación</option>
-                                    <!-- Se cargará dinámicamente -->
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="movimiento-destino-id" class="form-label">Ubicación Destino</label>
                                 <select class="form-select" id="movimiento-destino-id">
                                     <option value="">Seleccione ubicación</option>
-                                    <!-- Se cargará dinámicamente -->
                                 </select>
                             </div>
                         </div>
@@ -395,15 +425,15 @@
     </div>
 
     <!-- Modal para registrar ajuste -->
-<div class="modal fade" id="ajusteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nuevo Ajuste de Inventario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="ajuste-form">
+    <div class="modal fade" id="ajusteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Ajuste de Inventario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="ajuste-form">
                         <div class="mb-3">
                             <label for="ajuste-producto-id" class="form-label">Producto</label>
                             <select class="form-select" id="ajuste-producto-id" required>
@@ -414,17 +444,16 @@
                             <label for="ajuste-ubicacion-id" class="form-label">Ubicación</label>
                             <select class="form-select" id="ajuste-ubicacion-id" required>
                                 <option value="">Seleccione ubicación</option>
-                                <!-- Se cargará dinámicamente -->
                             </select>
                         </div>
-                    <div class="mb-3">
-                        <label for="ajuste-cantidad-actual" class="form-label">Cantidad Actual</label>
-                        <input type="number" class="form-control" id="ajuste-cantidad-actual" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="ajuste-cantidad-nueva" class="form-label">Cantidad Nueva</label>
-                        <input type="number" class="form-control" id="ajuste-cantidad-nueva" min="0" required>
-                    </div>
+                        <div class="mb-3">
+                            <label for="ajuste-cantidad-actual" class="form-label">Cantidad Actual</label>
+                            <input type="number" class="form-control" id="ajuste-cantidad-actual" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ajuste-cantidad-nueva" class="form-label">Cantidad Nueva</label>
+                            <input type="number" class="form-control" id="ajuste-cantidad-nueva" min="0" required>
+                        </div>
                         <div class="mb-3">
                             <label for="ajuste-motivo" class="form-label">Motivo del Ajuste</label>
                             <select class="form-select" id="ajuste-motivo" required>
@@ -443,21 +472,83 @@
                         </div>
                     </form>
                 </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btn-save-ajuste">Registrar Ajuste</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-ajuste">Registrar Ajuste</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts en el orden adecuado -->
     <script src="/assets/js/config.js"></script>
+    <script>
+    // Configurar URLs y gestionar usuario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar URL de API correcta
+        if (window.APP_CONFIG) {
+            window.APP_CONFIG.API_URL = 'http://localhost:3000/api';
+            console.log('API URL configurada correctamente:', window.APP_CONFIG.API_URL);
+        }
+        
+        // Mostrar nombre del usuario
+        const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const usernameDisplay = document.getElementById('admin-username');
+        if (usernameDisplay && userData.nombre) {
+            usernameDisplay.textContent = userData.nombre;
+        }
+        
+        // Configurar cierre de sesión
+        document.getElementById('admin-logout').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('userAuthToken');
+            localStorage.removeItem('currentUser');
+            document.cookie = 'authToken=; path=/; max-age=0';
+            window.location.href = '/pages/login.html';
+        });
+        
+        // Ocultar overlay de autenticación
+        const authOverlay = document.getElementById('auth-overlay');
+        if (authOverlay) {
+            authOverlay.style.display = 'none';
+        }
+        
+        // Configurar navegación por tabs
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remover active de todos los enlaces
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Agregar active al enlace actual
+                this.classList.add('active');
+                
+                // Obtener el id del destino
+                const targetId = this.getAttribute('href').substring(1);
+                
+                // Ocultar todas las secciones
+                document.querySelectorAll('main section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Mostrar la sección correspondiente
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                }
+            });
+        });
+        
+        // Mostrar sección inicial (stock)
+        document.querySelectorAll('main section').forEach(section => {
+            section.style.display = section.id === 'stock' ? 'block' : 'none';
+        });
+    });
+    </script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/inventarioSoap.js"></script>
     <script src="/assets/js/admin/inventario.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    
 </body>
 </html>

@@ -12,137 +12,8 @@
     
     <!-- Estilos propios -->
     <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
-    
-    <style>
-        .checkout-header {
-            background-color: #f8f9fa;
-            padding: 20px 0;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .checkout-steps {
-            display: flex;
-            margin-bottom: 30px;
-        }
-        
-        .checkout-step {
-            flex: 1;
-            text-align: center;
-            padding: 15px;
-            position: relative;
-        }
-        
-        .checkout-step.active {
-            font-weight: bold;
-            color: #0d6efd;
-        }
-        
-        .checkout-step:not(:last-child):after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 0;
-            width: 50%;
-            height: 2px;
-            background-color: #dee2e6;
-            transform: translateY(-50%);
-        }
-        
-        .checkout-step:not(:first-child):before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 50%;
-            height: 2px;
-            background-color: #dee2e6;
-            transform: translateY(-50%);
-        }
-        
-        .checkout-step.active:after,
-        .checkout-step.active:before {
-            background-color: #0d6efd;
-        }
-        
-        .checkout-step-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #f8f9fa;
-            border: 2px solid #dee2e6;
-            margin-bottom: 10px;
-        }
-        
-        .checkout-step.active .checkout-step-icon {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-            color: white;
-        }
-        
-        .cart-summary {
-            background-color: #f8f9fa;
-            padding: 25px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-        }
-        
-        .cart-summary h3 {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .cart-summary-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0 0 15px 0;
-        }
-        
-        .cart-summary-list li {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .cart-summary-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.25rem;
-            font-weight: bold;
-            padding-top: 15px;
-            margin-top: 15px;
-            border-top: 2px solid #dee2e6;
-        }
-        
-        /* Spinner para carga */
-        .checkout-loader {
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .checkout-loader p {
-            margin-bottom: 15px;
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: #0d6efd;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/checkout.css"
+
 </head>
 <body>
     <!-- Header/Navbar Bootstrap -->
@@ -392,7 +263,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Scripts propios -->
+    <script src="/assets/js/fix-logout-loop.js"></script>
     <script src="/assets/js/config.js"></script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/utils.js"></script>
@@ -400,5 +271,13 @@
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/carrito.js"></script>
     <script src="/assets/js/checkout.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/cart-auth-integration.js"></script>
+    <script src="/assets/js/headerAuth.js"></script>
+    <script src="/assets/js/aprobacionSoap.js"></script>
+    <script src="/assets/js/webpaySoap.js"></script>
+    <script src="/assets/js/checkout.js"></script>
+        
+    
 </body>
 </html>

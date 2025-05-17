@@ -13,139 +13,15 @@
     
     <!-- Estilos propios -->
     <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    <link rel="stylesheet" href="/assets/css/categorias.css">
     
-    <style>
-        /* Estilos mejorados para tarjetas de categoría */
-        .category-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-        }
-        
-        .category-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        .category-gradient {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        .category-content {
-            position: relative;
-            z-index: 2;
-            min-height: 250px; /* Altura fija para todas las tarjetas */
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Ajuste del contenedor principal para igualar alturas */
-        .row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
-            display: flex;
-            margin-bottom: 30px;
-        }
-        
-        .row-cols-1.row-cols-md-2.row-cols-lg-3 .card {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .category-icon {
-            display: inline-block;
-            background-color: rgba(255, 255, 255, 0.2);
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        
-        .category-card .btn {
-            transition: all 0.3s ease;
-            opacity: 0.9;
-        }
-        
-        .category-card:hover .btn {
-            opacity: 1;
-            transform: translateX(5px);
-        }
-        
-        /* Animación para productos */
-        .product-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        /* Mejora para el breadcrumb */
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: "›";
-            font-size: 1.2rem;
-            line-height: 1;
-            vertical-align: middle;
-        }
-        
-        /* Mejora para el título de sección */
-        .section-title {
-            position: relative;
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 3px;
-            background-color: #0d6efd;
-            bottom: 0;
-            left: 25%;
-        }
-        
-        /* Para la paginación */
-        .pagination .page-link {
-            color: #0d6efd;
-            border-radius: 50%;
-            margin: 0 3px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .pagination .page-link:hover {
-            background-color: #0d6efd;
-            color: white;
-        }
-        
-        .pagination .active .page-link {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-        
-        /* Estilo para toast notifications */
-        .toast-container {
-            z-index: 1100;
-        }
-    </style>
 </head>
 <body>
     <!-- Header/Navbar Bootstrap Mejorado -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default.jpg'">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23ffffff'/%3E%3Ctext x='20' y='23' font-family='Arial' font-size='16' text-anchor='middle' fill='%230d6efd'%3EFM%3C/text%3E%3C/svg%3E" alt="FERREMAS" height="40" class="me-2">
                 <span class="fw-bold">FERREMAS</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
@@ -154,12 +30,12 @@
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/index.html">
+                        <a class="nav-link" href="/index.html">
                             <i class="fas fa-home me-1"></i> Inicio
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/pages/categorias.html">
+                        <a class="nav-link active" href="/pages/categorias.html">
                             <i class="fas fa-th-large me-1"></i> Categorías
                         </a>
                     </li>
@@ -175,12 +51,6 @@
                 
                 <!-- Botones de autenticación para usuarios no autenticados -->
                 <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
-                    <a href="/pages/login.html" class="btn btn-outline-light me-2">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </a>
-                    <a href="/pages/register.html" class="btn btn-light">
-                        <i class="fas fa-user-plus"></i> Registrarse
-                    </a>
                 </div>
 
                 <!-- Menú para usuarios autenticados -->
@@ -191,9 +61,9 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
                         <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
-                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/crud.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="logout-button" onclick="logout(); setTimeout(function() { window.location.href = '/index.html'; }, 100);"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     </ul>
                 </div>
                 
@@ -224,109 +94,12 @@
             <p class="text-center text-muted mb-5">Explora nuestra amplia variedad de productos por categoría</p>
             
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="categories-container">
-                <!-- Categoría 1 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #007bff, #00c3ff);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-tools fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas</h3>
-                                <p class="mb-0 opacity-75">Todo tipo de herramientas para profesionales y aficionados</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=1" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Las categorías se cargarán dinámicamente aquí -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
                     </div>
-                </div>
-                
-                <!-- Categoría 2 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #28a745, #7fd858);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-hammer fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas Manuales</h3>
-                                <p class="mb-0 opacity-75">Martillos, destornilladores, llaves y mucho más</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=2" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 3 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #fd7e14, #ffb84d);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-bolt fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Herramientas Eléctricas</h3>
-                                <p class="mb-0 opacity-75">Taladros, sierras eléctricas y equipos de alta potencia</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=3" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 4 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #6f42c1, #a885e0);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-building fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Materiales de Construcción</h3>
-                                <p class="mb-0 opacity-75">Cemento, ladrillos, madera y todos los materiales que necesitas</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=4" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Categoría 5 -->
-                <div class="col">
-                    <div class="card category-card h-100 border-0 shadow-sm overflow-hidden">
-                        <div class="position-relative">
-                            <div class="category-gradient" style="background: linear-gradient(45deg, #ffc107, #ffe066);"></div>
-                            <div class="category-content p-4 text-white">
-                                <div class="category-icon mb-3">
-                                    <i class="fas fa-cogs fa-3x"></i>
-                                </div>
-                                <h3 class="h4 mb-2">Ferretería General</h3>
-                                <p class="mb-0 opacity-75">Tornillos, tuercas, clavos y todo tipo de accesorios</p>
-                                <div class="mt-auto pt-3">
-                                    <a href="/pages/categorias.html?id=5" class="btn btn-sm btn-light">
-                                        Ver Productos <i class="fas fa-chevron-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="mt-2">Cargando categorías...</p>
                 </div>
             </div>
         </div>
@@ -388,104 +161,87 @@
     
     <!-- Scripts propios -->
     <script src="/assets/js/config.js"></script>
+    <script>
+    // Configurar correctamente la URL de la API
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.APP_CONFIG) {
+            window.APP_CONFIG.API_URL = 'http://localhost:3000/api';
+            console.log('API URL configurada correctamente:', window.APP_CONFIG.API_URL);
+        }
+    });
+    </script>
+    <script src="/assets/js/fix-logout-loop.js"></script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/categorias.js"></script>
     <script src="/assets/js/productos.js"></script>
     <script src="/assets/js/carrito.js"></script>
-   
+    <script src="/assets/js/cart-auth-integration.js"></script>
+    <script src="/assets/js/auth-bridge.js"></script>
+    <script src="/assets/js/headerAuth.js"></script>
+    <script src="/assets/js/aprobacionSoap.js"></script>
+    <script src="/assets/js/webpaySoap.js"></script>
+    <script src="/assets/js/checkout.js"></script>
     
+    
+    <!-- Evento para el botón de cerrar sesión -->
     <script>
-        // Mostrar toast de Bootstrap - Función global que ahora se utiliza desde carrito.js
-        function showToastLegacy(message, type = 'success') {
-            // Esta función está aquí para compatibilidad, pero utilizaremos la de carrito.js
-            if (typeof window.showToast === 'function') {
-                window.showToast(message, type);
-            } else {
-                // Crear toast container si no existe
-                let toastContainer = document.getElementById('toast-container');
-                if (!toastContainer) {
-                    toastContainer = document.createElement('div');
-                    toastContainer.id = 'toast-container';
-                    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                    document.body.appendChild(toastContainer);
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (typeof logout === 'function') {
+                    logout();
+                    setTimeout(function() { 
+                        window.location.href = '/index.html'; 
+                    }, 100);
                 }
-                
-                // Crear el toast
-                const toastId = 'toast-' + Date.now();
-                const toast = document.createElement('div');
-                toast.id = toastId;
-                toast.className = `toast align-items-center text-white bg-${type} border-0`;
-                toast.setAttribute('role', 'alert');
-                toast.setAttribute('aria-live', 'assertive');
-                toast.setAttribute('aria-atomic', 'true');
-                
-                let icon = 'check-circle';
-                if (type === 'danger') icon = 'exclamation-circle';
-                if (type === 'warning') icon = 'exclamation-triangle';
-                if (type === 'info') icon = 'info-circle';
-                
-                toast.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fas fa-${icon} me-2"></i>${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Inicializar y mostrar el toast
-                const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-                bsToast.show();
-                
-                // Eliminar el toast después de ocultarse
-                toast.addEventListener('hidden.bs.toast', function() {
-                    this.remove();
-                });
+            });
+        }
+    });
+    </script>
+
+    <!-- Corrección de rutas de imágenes -->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar estado de autenticación
+    setTimeout(function() {
+        if (localStorage.getItem('userAuthToken') && localStorage.getItem('currentUser')) {
+            // Si hay un token, pero los elementos de usuario no están visibles
+            const authButtons = document.getElementById('auth-buttons');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (authButtons && userMenu) {
+                if (authButtons.style.display !== 'none') {
+                    console.log('Corrigiendo visualización de elementos de autenticación');
+                    authButtons.style.display = 'none';
+                    userMenu.style.display = 'flex !important';
+                    userMenu.setAttribute('style', 'display: flex !important');
+                    
+                    // Actualizar nombre de usuario
+                    try {
+                        const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                        const usernameDisplay = document.getElementById('username-display');
+                        if (usernameDisplay && userData.nombre) {
+                            usernameDisplay.textContent = userData.nombre;
+                        }
+                        
+                        // Mostrar opciones de administrador si corresponde
+                        if (userData.rol === 'admin') {
+                            const adminItems = document.querySelectorAll('.admin-only, #admin-menu-item');
+                            adminItems.forEach(item => {
+                                item.style.display = 'block';
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error al procesar datos de usuario:', e);
+                    }
+                }
             }
         }
-        
-        // Código de inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            // Actualizar contador del carrito
-            if (typeof window.updateCartCount === 'function') {
-                window.updateCartCount();
-            }
-            
-            // Aplicar manejo de eventos a botones de "Ver Productos" y "Agregar al carrito"
-            function setupEventHandlers() {
-                // 1. Gestionar botones "Ver Productos" en tarjetas de categorías
-                document.querySelectorAll('.category-content .btn-light, .category-card .stretched-link').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        // El enlace debería funcionar naturalmente, pero por si acaso...
-                        console.log("Enlace de categoría clickeado");
-                    });
-                });
-            }
-            
-            // Verificar si estamos en la página de categorías
-            const urlParams = new URLSearchParams(window.location.search);
-            const categoriaId = urlParams.get('id');
-            
-            // Configurar manejadores de eventos después de que el DOM esté listo
-            setupEventHandlers();
-            
-            // Si hay un ID de categoría y existe la función de mostrar productos, usarla
-            if (categoriaId && typeof mostrarProductosCategoriaBootstrap === 'function') {
-                try {
-                    // Asegurar que la función mostrarProductosCategoriaBootstrap se invoca correctamente
-                    console.log("Mostrando productos para categoría:", categoriaId);
-                    mostrarProductosCategoriaBootstrap(categoriaId);
-                    
-                    // Configurar manejadores de eventos nuevamente después de cargar productos
-                    setTimeout(setupEventHandlers, 500);
-                } catch (error) {
-                    console.error("Error al mostrar productos:", error);
-                }
-            }
-        });
+    }, 100); // Ligero retraso para asegurar que otros scripts hayan terminado
+});
     </script>
 </body>
 </html>

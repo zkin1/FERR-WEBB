@@ -13,110 +13,66 @@
     
     <!-- Estilos propios -->
     <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
-    
+    <link rel="stylesheet" href="/assets/css/styles.css"> <!-- Aquí irá tu CSS completo -->
+
+    <!-- Estilos adicionales para ajuste de imágenes -->
     <style>
-        /* Estilos mejorados para tarjetas de categoría */
-        .category-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-        }
-        
-        .category-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        .category-gradient {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        .category-content {
-            position: relative;
-            z-index: 2;
-            min-height: 250px; /* Altura fija para todas las tarjetas */
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Ajuste del contenedor principal para igualar alturas */
-        .row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
-            display: flex;
-            margin-bottom: 30px;
-        }
-        
-        .row-cols-1.row-cols-md-2.row-cols-lg-3 .card {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .category-icon {
-            display: inline-block;
-            background-color: rgba(255, 255, 255, 0.2);
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+        /* Solución inmediata para las imágenes */
+        .product-img-container, .text-center.p-3 {
+            height: 180px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            overflow: hidden;
         }
-        
-        .category-card .btn {
-            transition: all 0.3s ease;
-            opacity: 0.9;
+        .product-img, .img-fluid {
+            max-height: 150px;
+            max-width: 100%;
+            object-fit: contain;
         }
-        
-        .category-card:hover .btn {
-            opacity: 1;
-            transform: translateX(5px);
-        }
-        
-        /* Mejora para el título de sección */
-        h2.section-title {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-        }
-        
-        h2.section-title::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 3px;
-            background-color: #0d6efd;
-            bottom: 0;
-            left: 25%;
-        }
-        
-        /* Animación para productos */
-        .product-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        /* Fallback para imágenes por defecto */
+        img[src$="default.jpg"] {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="%23b0b0b0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 40px;
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
+    <!-- Verificación inicial de rol -->
+    <script>
+    // Función para obtener el rol del usuario actual
+    function getUserRole() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return userData.rol || 'guest';
+        } catch (e) {
+            console.error('Error al obtener rol de usuario:', e);
+            return 'guest';
+        }
+    }
+    
+    // Función para verificar si el usuario está autenticado
+    function isAuthenticated() {
+        return localStorage.getItem('userAuthToken') !== null;
+    }
+    </script>
+
+    <!-- Header/Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <img src="/assets/images/logo.png" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default.jpg'">
+                <img src="/assets/images/logo.jpg" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default-logo.jpg'">
                 <span class="fw-bold">FERREMAS</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Menú común para todos los usuarios -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link active" href="/index.html">
@@ -128,7 +84,28 @@
                             <i class="fas fa-th-large me-1"></i> Categorías
                         </a>
                     </li>
+                    
+                    <!-- Menú para usuarios normales (cliente) -->
+                    <li class="nav-item user-only" style="display: none;">
+                        <a class="nav-link" href="/pages/mis-pedidos.html">
+                            <i class="fas fa-shopping-bag me-1"></i> Mis Pedidos
+                        </a>
+                    </li>
+                    
+                    <!-- Menú exclusivo para administradores -->
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/crud.html">
+                            <i class="fas fa-cog me-1"></i> Administración
+                        </a>
+                    </li>
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/inventario.html">
+                            <i class="fas fa-boxes me-1"></i> Inventario
+                        </a>
+                    </li>
                 </ul>
+                
+                <!-- Formulario de búsqueda -->
                 <form class="d-flex me-2">
                     <div class="input-group">
                         <input class="form-control" type="search" placeholder="Buscar productos..." aria-label="Buscar">
@@ -156,9 +133,9 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
                         <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
-                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/crud.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="logout-button" onclick="logout(); setTimeout(function() { window.location.href = '/index.html'; }, 100);"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     </ul>
                 </div>
                 
@@ -174,7 +151,7 @@
     <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="/assets/images/default.jpg" class="d-block w-100" alt="Ofertas" style="height: 400px; object-fit: cover;">
+                <img src="/assets/images/banner1.jpg" class="d-block w-100" alt="Ofertas" style="height: 400px; object-fit: cover;" onerror="this.src='/assets/images/default.jpg'">
                 <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
                     <h1>Todo para tu proyecto de construcción</h1>
                     <p class="mb-4">Calidad y variedad en un solo lugar</p>
@@ -191,23 +168,24 @@
             <p class="text-center text-muted mb-4">Los productos más populares de nuestra tienda</p>
             
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="featured-products">
-                <!-- Producto 1 -->
+                <!-- Producto 1 (ejemplo) - Se cargará dinámicamente -->
                 <div class="col">
                     <div class="card h-100 shadow-sm product-card">
                         <div class="position-absolute top-0 end-0 m-2">
                             <span class="badge bg-danger">Oferta</span>
                         </div>
-                        <div class="text-center p-3">
-                            <img src="/assets/images/default.jpg" class="img-fluid" alt="Martillo Profesional" style="height: 150px; object-fit: contain;">
+                        <div class="text-center p-3 product-img-container">
+                            <img src="/assets/images/productos/HM001.jpg" class="product-img" alt="Martillo Profesional" 
+                                 onerror="this.onerror=null; this.src='/assets/images/productos/default.jpg';">
                         </div>
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
+                            <h5 class="card-title product-title">
                                 <a href="/product-detail.html?id=1" class="text-decoration-none">Martillo Profesional</a>
                             </h5>
                             <p class="card-text text-muted small">Código: MART001</p>
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <span class="fw-bold text-primary">$12.990</span>
-                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="1" data-nombre="Martillo Profesional" data-precio="12990" data-imagen="/assets/images/default.jpg">
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="1" data-nombre="Martillo Profesional" data-precio="12990" data-imagen="/assets/images/productos/HM001.jpg">
                                     <i class="fas fa-cart-plus"></i> Agregar
                                 </button>
                             </div>
@@ -215,7 +193,7 @@
                     </div>
                 </div>
                 
-                <!-- Otros productos... -->
+                <!-- Aquí se cargarán más productos dinámicamente -->
                 
             </div>
             
@@ -234,7 +212,6 @@
             <p class="text-center text-muted mb-5">Encuentra todo lo que necesitas para tu proyecto</p>
             
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="categories-container">
-                <!-- Categorías... -->
             </div>
         </div>
     </section>
@@ -252,8 +229,6 @@
                     <ul class="list-unstyled">
                         <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
                         <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Ofertas</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Contacto</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
@@ -272,10 +247,94 @@
     <!-- Contenedor para toasts -->
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
+    <!-- Script para el manejo de imágenes por defecto -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Crear imagen placeholder para usar en caso de errores
+        const placeholderImage = document.createElement('img');
+        placeholderImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2IwYjBiMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiPjwvY2lyY2xlPjxwb2x5bGluZSBwb2ludHM9IjIxIDE1IDE2IDEwIDUgMjEiPjwvcG9seWxpbmU+PC9zdmc+';
+        
+        // Reemplazar cualquier imagen con error
+        const allImages = document.querySelectorAll('img');
+        allImages.forEach(img => {
+            // Si la imagen ya ha cargado con un error o tiene default.jpg
+            if (img.complete && (img.naturalHeight === 0 || img.src.includes('default.jpg'))) {
+                img.src = placeholderImage.src;
+                img.classList.add('placeholder-img');
+            }
+            
+            // Para errores futuros
+            img.addEventListener('error', function() {
+                this.src = placeholderImage.src;
+                this.classList.add('placeholder-img');
+            });
+        });
+        
+        // Sobrescribir la función createProductCard para mejorar el manejo de imágenes
+        if (typeof window.createProductCard !== 'undefined') {
+            const originalCreateProductCard = window.createProductCard;
+            window.createProductCard = function(producto) {
+                const card = document.createElement('div');
+                card.className = 'col';
+                
+                const productDetailUrl = `product-detail.html?id=${producto.id}`;
+                const imageUrl = `/assets/images/productos/${producto.codigo}.jpg`;
+                
+                card.innerHTML = `
+                    <div class="card h-100 shadow-sm product-card">
+                        ${producto.precio_oferta ? '<div class="position-absolute top-0 end-0 m-2"><span class="badge bg-danger">Oferta</span></div>' : ''}
+                        <div class="text-center p-3 product-img-container">
+                            <img src="${imageUrl}" class="product-img" alt="${producto.nombre}" 
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2IwYjBiMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiPjwvY2lyY2xlPjxwb2x5bGluZSBwb2ludHM9IjIxIDE1IDE2IDEwIDUgMjEiPjwvcG9seWxpbmU+PC9zdmc+'; this.classList.add('placeholder-img');">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title product-title">
+                                <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
+                            </h5>
+                            <p class="card-text text-muted small">Código: ${producto.codigo}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">
+                                    ${producto.precio_oferta ? 
+                                        `<span class="text-decoration-line-through text-muted me-1">$${formatPrice(producto.precio)}</span> $${formatPrice(producto.precio_oferta)}` : 
+                                        `$${formatPrice(producto.precio)}`
+                                    }
+                                </span>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" 
+                                    data-nombre="${producto.nombre}" 
+                                    data-precio="${producto.precio_oferta || producto.precio}" 
+                                    data-imagen="${imageUrl}">
+                                    <i class="fas fa-cart-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Agregar evento al botón de agregar al carrito
+                const addButton = card.querySelector('.add-to-cart');
+                addButton.addEventListener('click', function() {
+                    const productData = {
+                        id: this.dataset.id,
+                        nombre: this.dataset.nombre,
+                        precio: parseFloat(this.dataset.precio),
+                        imagen: this.dataset.imagen,
+                        cantidad: 1
+                    };
+                    
+                    addToCart(productData);
+                    showNotification('Producto agregado al carrito');
+                });
+                
+                return card;
+            };
+        }
+    });
+    </script>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Scripts propios -->
+    <script src="/assets/js/fix-logout-loop.js"></script>
     <script src="/assets/js/config.js"></script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/utils.js"></script>
@@ -284,5 +343,11 @@
     <script src="/assets/js/categorias.js"></script>
     <script src="/assets/js/productos.js"></script>
     <script src="/assets/js/carrito.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/cart-auth-integration.js"></script>
+    <script src="/assets/js/headerAuth.js"></script>
+    <script src="/assets/js/aprobacionSoap.js"></script>
+    <script src="/assets/js/webpaySoap.js"></script>
+    <script src="/assets/js/checkout.js"></script>   
 </body>
 </html>

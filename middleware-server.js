@@ -14,10 +14,11 @@ const PORT = process.env.PORT || 3002; // Middleware en puerto 3002
 
 // Middleware para registrar el tiempo de inicio de la solicitud
 app.use((req, res, next) => {
-    req.startTime = Date.now();
+    if (req.url.includes('/api/')) {
+        console.log(`[${new Date().toISOString()}] 📝 Recibida solicitud: ${req.method} ${req.url}`);
+    }
     next();
 });
-
 // Configurar CORS
 app.use(cors({
     origin: '*',
@@ -267,6 +268,24 @@ app.get('/pages/:page', (req, res) => {
     });
 });
 
+app.use((req, res, next) => {
+    // Verificar si la solicitud es para default.jpg
+    if (req.url === '/assets/images/default.jpg') {
+        const filePath = path.join(__dirname, 'assets', 'images', 'default.jpg');
+        if (!fs.existsSync(filePath)) {
+            console.warn(`⚠️ El archivo ${filePath} no existe. Esto causa errores 404 recurrentes.`);
+            // Servir una imagen SVG en línea como fallback
+            res.setHeader('Content-Type', 'image/svg+xml');
+            res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                <rect width="200" height="200" fill="#f8f9fa"/>
+                <text x="100" y="100" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">Imagen no disponible</text>
+            </svg>`);
+            return;
+        }
+    }
+    next();
+});
+
 // Manejo de rutas para archivos específicos
 app.get('/cart.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'cart.html'));
@@ -318,6 +337,75 @@ app.use((err, req, res, next) => {
     // Error genérico para peticiones web
     res.status(500).send('Error interno del servidor');
 });
+
+
+app.use('/api/:service', (req, res, next) => {
+    // Excluir servicios ya configurados
+    const excludedServices = ['usuarios', 'auth', 'direcciones', 'soap', 'middleware', 'health', 'ping', 'categorias', 'productos'];
+    
+    if (!excludedServices.includes(req.params.service)) {
+        console.log(`Redirigiendo servicio genérico: ${req.params.service}`);
+        createProxyMiddleware({
+            target: 'http://localhost:3000',
+            changeOrigin: true,
+            pathRewrite: {
+                [`^/api/${req.params.service}`]: `/api/${req.params.service}`
+            },
+            onError: (err, req, res) => {
+                console.error(`Error en proxy API ${req.params.service}:`, err);
+                res.status(503).json({ message: 'Servicio no disponible', error: err.message });
+            }
+        })(req, res, next);
+    } else {
+        next();
+    }
+});
+
+app.use('/api/categorias', createProxyMiddleware({
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    pathRewrite: {
+        '^/api/categorias': '/api/categorias'
+    },
+    onError: (err, req, res) => {
+        console.error('Error en proxy API Categorías:', err);
+        res.status(503).json({ message: 'Servicio no disponible', error: err.message });
+    },
+    onProxyReq: (proxyReq, req, res) => {
+        console.log(`🔄 Proxy redireccionando ${req.method} a categorías: ${proxyReq.path}`);
+    }
+}));
+
+// Proxy para productos
+app.use('/api/productos', createProxyMiddleware({
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    pathRewrite: {
+        '^/api/productos': '/api/productos'
+    },
+    onError: (err, req, res) => {
+        console.error('Error en proxy API Productos:', err);
+        res.status(503).json({ message: 'Servicio no disponible', error: err.message });
+    },
+    onProxyReq: (proxyReq, req, res) => {
+        console.log(`🔄 Proxy redireccionando ${req.method} a productos: ${proxyReq.path}`);
+    }
+}));
+
+// Proxy para marcas
+app.use('/api/marcas', createProxyMiddleware({
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    pathRewrite: {
+        '^/api/marcas': '/api/marcas'
+    },
+    onError: (err, req, res) => {
+        console.error('Error en proxy API Marcas:', err);
+        res.status(503).json({ message: 'Servicio no disponible', error: err.message });
+    }
+}));
+
+
 
 // Iniciar el servidor y los clientes SOAP
 app.listen(PORT, async () => {

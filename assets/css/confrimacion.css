@@ -1,0 +1,109 @@
+        .confirmation-header {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .confirmation-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .confirmation-card {
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        
+        .confirmation-success .icon-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+        
+        .confirmation-success .icon-success {
+            color: #28a745;
+            font-size: 60px;
+        }
+        
+        .confirmation-pending .icon-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+        
+        .confirmation-pending .icon-pending {
+            color: #ffc107;
+            font-size: 60px;
+        }
+        
+        .order-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .qr-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background-color: #f8f9fa;
+            margin: 0 auto;
+        }
+        
+        .bank-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .bank-info {
+            margin: 5px 0;
+        }
+        
+        .important-note {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 15px;
+            border-top: 1px solid #dc3545;
+            padding-top: 15px;
+        }
+        
+        .actions-container {
+            margin-top: 30px;
+        }

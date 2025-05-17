@@ -1021,11 +1021,13 @@ async function saveStock() {
                     }
                     
                     const ajusteData = {
-                    producto_id: productoId,
-                    ubicacion_id: ubicacionId,
-                    cantidad_nueva: cantidad,
-                    motivo: motivo || 'Ajuste manual', 
-                    descripcion: descripcion || 'Ajuste desde formulario de stock'
+                        stock_id: stockId, // Incluir este campo cuando existe un ID
+                        producto_id: productoId,
+                        ubicacion_id: ubicacionId,
+                        cantidad_anterior: cantidadAnterior,
+                        cantidad_nueva: cantidad,
+                        motivo: motivo || 'Ajuste manual', 
+                        descripcion: descripcion || 'Ajuste desde formulario de stock'
                 };
                     
                     console.log('Registrando ajuste de stock:', ajusteData);

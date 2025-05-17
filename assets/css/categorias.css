@@ -1,0 +1,134 @@
+
+        .category-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .category-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .category-content {
+            position: relative;
+            z-index: 2;
+            min-height: 250px; /* Altura fija para todas las tarjetas */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Ajuste del contenedor principal para igualar alturas */
+        .row-cols-1.row-cols-md-2.row-cols-lg-3 .col {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        
+        .row-cols-1.row-cols-md-2.row-cols-lg-3 .card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-icon {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .category-card .btn {
+            transition: all 0.3s ease;
+            opacity: 0.9;
+        }
+        
+        .category-card:hover .btn {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+        
+        /* Animación para productos */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Mejora para el breadcrumb */
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            font-size: 1.2rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        
+        /* Mejora para el título de sección */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background-color: #0d6efd;
+            bottom: 0;
+            left: 25%;
+        }
+        
+        /* Para la paginación */
+        .pagination .page-link {
+            color: #0d6efd;
+            border-radius: 50%;
+            margin: 0 3px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .pagination .active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        /* Estilo para toast notifications */
+        .toast-container {
+            z-index: 1100;
+        }
+        
+        /* Imagen de placeholder en línea */
+        .placeholder-img {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            height: 150px;
+        }

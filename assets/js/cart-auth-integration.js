@@ -1,81 +1,152 @@
-function setupCartAuthEvents() {
-    console.log('Configurando eventos de autenticación para carrito...');
+// cart-auth-integration.js
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Inicializando integración carrito-autenticación');
     
-    // Patching logout function to handle cart
+    // Constantes para almacenamiento
+    const AUTH_TOKEN_KEY = 'userAuthToken';
+    const USER_DATA_KEY = 'currentUser';
+    
+    // Función mejorada para verificar autenticación
+    window.isAuthenticatedSecure = function() {
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+        const userData = localStorage.getItem(USER_DATA_KEY);
+        
+        // Verificación más robusta
+        if (!token || !userData) return false;
+        
+        try {
+            // Asegurar que el objeto de usuario es válido
+            const userObj = JSON.parse(userData);
+            return token && userObj && userObj.id;
+        } catch (e) {
+            console.error('Error al analizar datos de usuario:', e);
+            return false;
+        }
+    };
+    
+    // Sobreescribir la función de verificación de autenticación del carrito
+    if (typeof isAuthenticated === 'function') {
+        console.log('Extendiendo función isAuthenticated para mayor robustez');
+        window.isAuthenticated = window.isAuthenticatedSecure;
+    }
+    
+    // Interceptar eventos de logout para asegurar sincronización
     if (typeof logout === 'function') {
-        console.log('Extendiendo función logout...');
+        console.log('Extendiendo función logout para sincronizar con carrito');
         const originalLogout = logout;
         window.logout = function() {
-            // Dispatch event before logging out
-            console.log('Cerrando sesión, notificando para limpiar carrito...');
-            const event = new CustomEvent('auth_state_changed', {
-                detail: { state: 'logout' }
-            });
-            window.dispatchEvent(event);
+            console.log('Cerrando sesión, sincronizando carrito...');
             
-            // Document event for other components
+            // Notificar al carrito antes de cerrar sesión
+            if (typeof notifyAuthChange === 'function') {
+                notifyAuthChange('logout');
+            }
+            
+            // Notificar a otros componentes mediante eventos
             document.dispatchEvent(new Event('logout_success'));
             
-            // Call original logout function
+            // Ejecutar logout original
             return originalLogout.apply(this, arguments);
         };
     }
     
-    // Patching updateAuthUI function to handle login detection
-    if (typeof updateAuthUI === 'function') {
-        console.log('Extendiendo función updateAuthUI...');
-        const originalUpdateAuthUI = updateAuthUI;
-        window.updateAuthUI = function() {
-            // Get current auth state
-            const wasAuthenticated = isAuthenticatedCheck();
+    // Detectar cambios de autenticación en tiempo real
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function(key, value) {
+        // Llamar a la implementación original
+        originalSetItem.apply(this, arguments);
+        
+        // Detectar cambios en token o datos de usuario
+        if (key === AUTH_TOKEN_KEY || key === USER_DATA_KEY) {
+            console.log(`Estado de autenticación modificado: ${key}`);
             
-            // Call original function
-            const result = originalUpdateAuthUI.apply(this, arguments);
+            // Determinar si es login o logout
+            const isLoginEvent = value && value !== 'null' && value !== '{}';
+            const eventType = isLoginEvent ? 'login' : 'logout';
             
-            // Check if auth state changed to logged in
-            const isNowAuthenticated = isAuthenticatedCheck();
-            
-            // If just logged in, trigger event
-            if (!wasAuthenticated && isNowAuthenticated) {
-                console.log('Usuario recién autenticado, cargando carrito guardado...');
-                const event = new CustomEvent('auth_state_changed', {
-                    detail: { state: 'login' }
-                });
-                window.dispatchEvent(event);
-                
-                // Document event for other components
-                document.dispatchEvent(new Event('login_success'));
+            // Sincronizar con carrito
+            if (typeof notifyAuthChange === 'function') {
+                notifyAuthChange(eventType);
             }
             
-            return result;
-        };
-    }
+            // Actualizar UI si es necesario
+            if (typeof updateCartCount === 'function') {
+                setTimeout(updateCartCount, 100);
+            }
+        }
+    };
     
-    // Helper function to check authentication status
-    function isAuthenticatedCheck() {
-        const token = localStorage.getItem('userAuthToken');
-        const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        return !!token && Object.keys(userData).length > 0;
-    }
-}
-
-// Execute when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('cart-auth-integration.js - DOM loaded');
+    // Corregir problema de carrito en página de detalle de producto
+    const productDetailInit = function() {
+        if (window.location.pathname.includes('product-detail.html')) {
+            console.log('Inicializando página de detalle con autenticación verificada');
+            
+            // Verificar autenticación al cargar la página
+            if (window.isAuthenticatedSecure()) {
+                console.log('Usuario autenticado en detalle de producto, habilitando carrito');
+                
+                // Forzar actualización del carrito
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+                
+                // Asegurar que los event listeners del carrito estén correctamente inicializados
+                document.querySelectorAll('.add-to-cart, .add-to-cart-detail').forEach(btn => {
+                    // Eliminar listeners anteriores para evitar duplicados
+                    const newBtn = btn.cloneNode(true);
+                    btn.parentNode.replaceChild(newBtn, btn);
+                    
+                    // Agregar listener correctamente
+                    newBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Re-verificar autenticación justo antes de agregar al carrito
+                        if (!window.isAuthenticatedSecure()) {
+                            console.warn('Usuario no autenticado al intentar agregar al carrito');
+                            
+                            if (typeof showToast === 'function') {
+                                showToast('Debes iniciar sesión para agregar productos al carrito', 'warning');
+                            }
+                            
+                            // Redirigir al login después de un breve retraso
+                            setTimeout(() => {
+                                window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+                            }, 2000);
+                            
+                            return false;
+                        }
+                        
+                        // Obtener datos del producto desde el botón
+                        if (this.hasAttribute('data-id')) {
+                            // Para botones en listados
+                            const productData = {
+                                id: this.dataset.id,
+                                nombre: this.dataset.nombre,
+                                precio: parseFloat(this.dataset.precio),
+                                imagen: this.dataset.imagen,
+                                cantidad: 1
+                            };
+                            
+                            if (typeof addToCart === 'function') {
+                                addToCart(productData);
+                            }
+                        } else {
+                            // Para botón en detalle de producto
+                            console.log('Agregando desde detalle de producto');
+                            // El handler original ya debería estar configurado
+                        }
+                    });
+                });
+            } else {
+                console.log('Usuario no autenticado en detalle de producto');
+            }
+        }
+    };
     
-    // Setup cart auth events
-    setupCartAuthEvents();
+    // Ejecutar inicialización para detalle de producto
+    productDetailInit();
+    
+    // Re-aplicar en cambios de ruta
+    window.addEventListener('popstate', productDetailInit);
 });
-
-// Utility function to manually trigger auth events
-// This can be useful for debugging or when integrating with external auth systems
-window.triggerCartAuthEvent = function(state) {
-    console.log(`Triggering manual auth event: ${state}`);
-    const event = new CustomEvent('auth_state_changed', {
-        detail: { state: state }
-    });
-    window.dispatchEvent(event);
-    
-    // Also dispatch document event
-    document.dispatchEvent(new Event(`${state}_success`));
-};

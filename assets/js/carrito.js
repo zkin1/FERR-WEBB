@@ -3,6 +3,8 @@ const USER_CART_PREFIX = 'user_cart_';
 const AUTH_TOKEN_KEY = 'userAuthToken';
 const USER_DATA_KEY = 'currentUser';
 
+
+
 // Variables globales
 let isInitialized = false;
 
@@ -149,14 +151,48 @@ function removeFromCart(productId) {
         return null;
     }
     
+    console.log('Intentando eliminar producto con ID:', productId);
+    
     // Obtener carrito actual
     let cart = getCartFromStorage();
     
-    // Filtrar los items para eliminar el producto
-    cart.items = cart.items.filter(item => item.id !== productId);
+    // Guardar la cantidad original de elementos
+    const originalItemCount = cart.items.length;
     
-    // Recalcular total
-    cart.total = cart.items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    // Convertir productId a string para asegurar consistencia en la comparación
+    const productIdString = String(productId);
+    
+    // Filtrar los items para eliminar el producto - asegurando comparación consistente
+    cart.items = cart.items.filter(item => {
+        const itemId = String(item.id);
+        const shouldKeep = itemId !== productIdString;
+        if (!shouldKeep) {
+            console.log('Eliminando producto:', item.nombre);
+        }
+        return shouldKeep;
+    });
+    
+    // Verificar si realmente se eliminó algún producto
+    if (cart.items.length === originalItemCount) {
+        console.warn('No se encontró ningún producto con ID:', productId);
+        // Buscar con identidad estricta por si el tipo es el problema
+        const itemIndex = cart.items.findIndex(item => item.id == productId);
+        if (itemIndex >= 0) {
+            console.log('Producto encontrado con comparación débil, eliminando manualmente');
+            cart.items.splice(itemIndex, 1);
+        } else {
+            console.error('No se pudo encontrar el producto ni siquiera con comparación débil');
+        }
+    }
+    
+    // Recalcular total usando subtotal si está disponible o multiplicando precio por cantidad
+    cart.total = cart.items.reduce((sum, item) => {
+        if (typeof item.subtotal === 'number') {
+            return sum + item.subtotal;
+        } else {
+            return sum + (item.precio * item.cantidad);
+        }
+    }, 0);
     
     // Guardar en localStorage
     saveCartToStorage(cart);
@@ -166,6 +202,11 @@ function removeFromCart(productId) {
     
     // Mostrar notificación
     showToast('Producto eliminado del carrito', 'info');
+    
+    // Si estamos en la página de carrito, refrescar la vista
+    if (window.location.pathname.includes('cart.html')) {
+        renderCart();
+    }
     
     return cart;
 }
@@ -528,13 +569,127 @@ function addCartEventListeners() {
     }
     
     // Botón para proceder al pago
-    const checkoutBtn = document.getElementById('checkout-btn');
+    const checkoutBtn = document.getElementById('checkout-btn') || document.getElementById('checkout-button');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', function() {
-            // Redirigir a la página de checkout
-            window.location.href = 'checkout.html';
+            // Verificar autenticación
+            if (!isAuthenticated()) {
+                showToast('Debes iniciar sesión para continuar con la compra', 'warning');
+                
+                setTimeout(() => {
+                    // Guardar la URL actual para redireccionar después del login
+                    window.location.href = '/pages/login.html?redirect=' + encodeURIComponent('/checkout.html');
+                }, 1500);
+                return;
+            }
+            
+            // Verificar carrito
+            const cart = getCartFromStorage();
+            if (!cart.items || cart.items.length === 0) {
+                showToast('No puedes proceder al pago con un carrito vacío', 'warning');
+                return;
+            }
+            
+            // Redirigir a checkout
+            window.location.href = '/checkout.html';
         });
     }
+}
+
+// Función para verificar inventario
+async function checkCartInventory(cart) {
+    try {
+        // Validar que existe el servicio
+        if (!window.inventarioSoap || !window.inventarioSoap.getProductStock) {
+            return true; // Si no hay servicio de inventario, continuar
+        }
+        
+        // Verificar cada producto
+        for (const item of cart.items) {
+            const stockResult = await window.inventarioSoap.getProductStock(item.id);
+            // Comprobar si hay suficiente stock
+            const stockItems = stockResult.stockItems?.stockItem || [];
+            const totalStock = stockItems.reduce((sum, stockItem) => sum + (stockItem.cantidad || 0), 0);
+            
+            if (totalStock < item.cantidad) {
+                showToast(`No hay suficiente stock de: ${item.nombre}`, 'danger');
+                return false;
+            }
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error al verificar inventario:', error);
+        return true; // En caso de error, permitir continuar
+    }
+}
+
+// FUNCIÓN CORREGIDA: Configurar botones de checkout
+function setupCheckoutButtons() {
+    console.log('Configurando todos los botones de checkout');
+    
+    // Selectores válidos para CSS estándar (sin el :contains que es de jQuery)
+    const checkoutButtons = document.querySelectorAll('.btn-primary[href*="pago"], #checkout-btn, #checkout-button, [id*="proceder"]');
+    
+    // Buscar también botones que contienen el texto "Proceder al pago" manualmente
+    const allButtons = document.querySelectorAll('button, a.btn');
+    const textButtons = Array.from(allButtons).filter(btn => 
+        btn.textContent && (
+            btn.textContent.trim().includes('Proceder al pago') || 
+            btn.textContent.trim().includes('Proceder')
+        )
+    );
+    
+    // Combinar ambos conjuntos de botones
+    const allCheckoutButtons = [...Array.from(checkoutButtons), ...textButtons];
+    
+    // Eliminar duplicados
+    const uniqueButtons = [...new Set(allCheckoutButtons)];
+    
+    console.log('Botones de checkout encontrados:', uniqueButtons.length);
+    
+    // Añadir evento a cada botón
+    uniqueButtons.forEach(button => {
+        // Solo procesar si es un elemento válido
+        if (!button || typeof button.addEventListener !== 'function') {
+            return;
+        }
+        
+        // Remover eventos existentes para evitar duplicidad
+        const newButton = button.cloneNode(true);
+        if (button.parentNode) {
+            button.parentNode.replaceChild(newButton, button);
+        }
+        
+        // Añadir nuevo evento
+        newButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón de checkout clickeado:', this);
+            
+            // Verificar autenticación
+            if (!isAuthenticated()) {
+                console.log('Usuario no autenticado, redirigiendo a login');
+                showToast('Debes iniciar sesión para continuar con la compra', 'warning');
+                
+                setTimeout(() => {
+                    // Guardar URL de checkout para redireccionar después del login
+                    window.location.href = '/pages/login.html?redirect=' + encodeURIComponent('/checkout.html');
+                }, 1000);
+                return;
+            }
+            
+            // Verificar carrito
+            const cart = getCartFromStorage();
+            if (!cart.items || cart.items.length === 0) {
+                showToast('No puedes proceder al pago con un carrito vacío', 'warning');
+                return;
+            }
+            
+            // Redirigir a checkout
+            console.log('Redirigiendo a checkout');
+            window.location.href = '/checkout.html';
+        });
+    });
 }
 
 // Generar evento personalizado para notificar cambios de autenticación
@@ -560,7 +715,7 @@ if (window.logout) {
 }
 
 // Código a ejecutar cuando el DOM esté cargado
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado - carrito.js con autenticación');
     
     // Asegurar que las funciones están disponibles globalmente
@@ -600,12 +755,108 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCart();
     }
     
+    // Configurar botones de checkout en todas las páginas
+    setupCheckoutButtons();
+    
+    // Solución específica para el botón con el candado
+    configurarBotonCandado();
+    
     // Custom hook para login exitoso
     // Esto es para sistemas que no disparan eventos al iniciar sesión
     if (window.location.pathname.includes('login.html') && window.location.search.includes('success=true')) {
         notifyAuthChange('login');
     }
+    
+    // Añadir debugging de botones
+    debugBotones();
 });
+
+// Solución para botones de candado
+function configurarBotonCandado() {
+    // Buscar botones que tengan un ícono de candado o estén en el contenedor del resumen
+    const lockButtons = document.querySelectorAll('button.proceder-pago-lock, a.proceder-pago-lock, .cart-summary button, button .fa-lock, a .fa-lock');
+    
+    if (lockButtons.length > 0) {
+        console.log('Botones de candado encontrados:', lockButtons.length);
+        
+        lockButtons.forEach((btn, index) => {
+            console.log(`Configurando botón candado ${index + 1}`);
+            
+            // Eliminar eventos previos
+            const newBtn = btn.cloneNode(true);
+            if (btn.parentNode) {
+                btn.parentNode.replaceChild(newBtn, btn);
+            }
+            
+            // Configurar nuevo evento
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Botón candado clickeado');
+                
+                // Verificar autenticación
+                if (!isAuthenticated()) {
+                    console.log('Usuario no autenticado, redirigiendo a login');
+                    showToast('Debes iniciar sesión para continuar', 'warning');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/pages/login.html?redirect=' + encodeURIComponent('/checkout.html');
+                    }, 1000);
+                    return;
+                }
+                
+                // Verificar carrito
+                const cart = getCartFromStorage();
+                if (!cart.items || cart.items.length === 0) {
+                    showToast('El carrito está vacío', 'warning');
+                    return;
+                }
+                
+                // Redirigir a checkout
+                window.location.href = '/checkout.html';
+            });
+        });
+    } else {
+        console.log('No se encontraron botones de candado');
+    }
+}
+
+// Función de debugging para botones
+function debugBotones() {
+    console.log('=== DEBUGGER DE BOTONES ===');
+    
+    // Botones en página de carrito
+    if (window.location.pathname.includes('cart.html') || window.location.href.includes('carrito')) {
+        console.log('Página de carrito detectada, buscando botones de checkout');
+        
+        const allButtons = document.querySelectorAll('button, a.btn');
+        console.log('Total de botones y enlaces:', allButtons.length);
+        
+        // Listar todos los botones para checkout
+        const checkoutButtons = Array.from(allButtons).filter(btn => 
+            btn.id === 'checkout-btn' || 
+            btn.id === 'checkout-button' || 
+            (btn.textContent && btn.textContent.includes('Proceder')) ||
+            btn.classList.contains('btn-proceder-pago') ||
+            btn.querySelector('.fa-lock')
+        );
+        
+        console.log('Botones de checkout identificados:', checkoutButtons.length);
+        
+        checkoutButtons.forEach((btn, i) => {
+            console.log(`Botón ${i+1}:`, {
+                elemento: btn,
+                id: btn.id || 'sin-id',
+                clase: btn.className,
+                texto: btn.textContent ? btn.textContent.trim() : 'sin-texto',
+                tieneCandado: !!btn.querySelector('.fa-lock')
+            });
+        });
+    }
+    
+    console.log('=== FIN DEBUGGER DE BOTONES ===');
+}
 
 // Patching auth.js
 // Esto añade la notificación de cambio de autenticación a las funciones existentes
@@ -700,6 +951,7 @@ window.formatPrice = formatPrice;
 window.renderCart = renderCart;
 window.diagnoseCart = diagnoseCart; // Función de utilidad para depuración
 window.notifyAuthChange = notifyAuthChange; // Para notificar cambios de autenticación
+window.checkCartInventory = checkCartInventory; // Exponer función de verificación de inventario
 
 // Confirmar que las funciones están disponibles globalmente
 console.log('carrito.js - Funciones globales definidas correctamente:');

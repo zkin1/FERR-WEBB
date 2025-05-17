@@ -117,54 +117,40 @@ async function loadNewProducts() {
 }
 
 // Función para crear una tarjeta de producto
+// Modifica la función createProductCard
 function createProductCard(producto) {
-    // Crear elemento principal
     const card = document.createElement('div');
-    card.className = 'product-card';
+    card.className = 'col';
     
-    // Usar ruta simple y directa
     const productDetailUrl = `product-detail.html?id=${producto.id}`;
+    const imageUrl = `/assets/images/productos/${producto.codigo}.jpg`;
     
-    // Usar rutas simples para imágenes
-    const imageUrl = `/assets/images/default.jpg`;
-    
-    // HTML interno del card con URL simplificadas
     card.innerHTML = `
-        <div class="product-image">
-            <a href="${productDetailUrl}">
-                <img src="${imageUrl}" alt="${producto.nombre}">
-            </a>
-        </div>
-        <div class="product-details">
-            <h3 class="product-title">
-                <a href="${productDetailUrl}">${producto.nombre}</a>
-            </h3>
-            <div class="product-price">
-                ${producto.precio_oferta ? 
-                    `<span class="original-price">$${formatPrice(producto.precio)}</span> $${formatPrice(producto.precio_oferta)}` : 
-                    `$${formatPrice(producto.precio)}`
-                }
+        <div class="card h-100 shadow-sm product-card">
+            <div class="position-absolute top-0 end-0 m-2">
+                ${producto.precio_oferta ? '<span class="badge bg-danger">Oferta</span>' : ''}
             </div>
-            <button class="btn add-to-cart" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio_oferta || producto.precio}" data-imagen="${imageUrl}">
-                Agregar al carrito
-            </button>
+            <div class="text-center p-3 product-img-container">
+                <img src="${imageUrl}" class="product-img" alt="${producto.nombre}" 
+                     onerror="this.onerror=null; this.src='/assets/images/productos/default.jpg';">
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title product-title">
+                    <a href="${productDetailUrl}" class="text-decoration-none">${producto.nombre}</a>
+                </h5>
+                <p class="card-text text-muted small">Código: ${producto.codigo}</p>
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <span class="fw-bold text-primary">$${formatPrice(producto.precio_oferta || producto.precio)}</span>
+                    <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${producto.id}" 
+                        data-nombre="${producto.nombre}" 
+                        data-precio="${producto.precio_oferta || producto.precio}" 
+                        data-imagen="${imageUrl}">
+                        <i class="fas fa-cart-plus"></i> Agregar
+                    </button>
+                </div>
+            </div>
         </div>
     `;
-    
-    // Agregar evento al botón de agregar al carrito
-    const addButton = card.querySelector('.add-to-cart');
-    addButton.addEventListener('click', function() {
-        const productData = {
-            id: this.dataset.id,
-            nombre: this.dataset.nombre,
-            precio: parseFloat(this.dataset.precio),
-            imagen: this.dataset.imagen,
-            cantidad: 1
-        };
-        
-        addToCart(productData);
-        showNotification('Producto agregado al carrito');
-    });
     
     return card;
 }
