@@ -154,12 +154,12 @@
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/index.html">
+                        <a class="nav-link active" href="/index.html">
                             <i class="fas fa-home me-1"></i> Inicio
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/pages/categorias.html">
+                        <a class="nav-link" href="/pages/categorias.html">
                             <i class="fas fa-th-large me-1"></i> Categorías
                         </a>
                     </li>
@@ -173,6 +173,7 @@
                     </div>
                 </form>
                 
+                <!-- Botones de autenticación para usuarios no autenticados -->
                 <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
                     <a href="/pages/login.html" class="btn btn-outline-light me-2">
                         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
@@ -192,7 +193,7 @@
                         <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
                         <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button" onclick="logout(); setTimeout(function() { window.location.href = '/index.html'; }, 100);"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     </ul>
                 </div>
                 
@@ -460,27 +461,6 @@
                     btn.addEventListener('click', function(e) {
                         // El enlace debería funcionar naturalmente, pero por si acaso...
                         console.log("Enlace de categoría clickeado");
-                    });
-                });
-                
-                // 2. Gestionar botones "Agregar al carrito" en productos
-                document.querySelectorAll('.add-to-cart').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        // Verificar si la función globalizada addToCart está disponible
-                        if (typeof window.addToCart === 'function') {
-                            const productData = {
-                                id: this.dataset.id,
-                                nombre: this.dataset.nombre,
-                                precio: parseFloat(this.dataset.precio),
-                                imagen: this.dataset.imagen,
-                                cantidad: 1
-                            };
-                            
-                            window.addToCart(productData);
-                        } else {
-                            console.error("Función addToCart no disponible");
-                            showToastLegacy('Producto agregado al carrito', 'success');
-                        }
                     });
                 });
             }

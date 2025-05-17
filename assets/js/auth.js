@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Verificar token al cargar la página
     validateSession();
+    
+    // Verificar acceso admin si estamos en una página admin
+    if (window.location.pathname.startsWith('/admin/')) {
+        verificarAccesoAdmin();
+    }
 });
 
 // Función para cerrar sesión
@@ -24,6 +29,9 @@ function logout() {
         // Fallback si userApi no está disponible
         localStorage.removeItem('userAuthToken');
         localStorage.removeItem('currentUser');
+        
+        // Borrar cookie
+        document.cookie = 'authToken=; path=/; max-age=0';
     }
     
     // Actualizar UI
@@ -135,6 +143,46 @@ function updateAuthUI() {
     console.log('UI de autenticación actualizada');
 }
 
+// Nueva función para verificar acceso admin
+function verificarAccesoAdmin() {
+    const token = localStorage.getItem('userAuthToken');
+    
+    if (!token) {
+        // No hay token, redirigir a login
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        return;
+    }
+    
+    try {
+        // Decodificar el token (simple, sin verificar firma)
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        // Verificar expiración
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < now) {
+            console.error('Token expirado');
+            window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        
+        // Verificar rol
+        if (payload.rol !== 'admin') {
+            console.error('Acceso denegado: no es administrador');
+            window.location.href = '/pages/acceso-denegado.html';
+            return;
+        }
+        
+        // Si hay div de overlay, ocultarlo
+        const overlay = document.getElementById('auth-overlay');
+        if (overlay) overlay.style.display = 'none';
+        
+        console.log('Acceso de administrador verificado');
+    } catch (e) {
+        console.error('Error al verificar token:', e);
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+    }
+}
+
 // Función para validar sesión activa
 async function validateSession() {
     const token = localStorage.getItem('userAuthToken');
@@ -147,6 +195,10 @@ async function validateSession() {
             // Actualizar datos del usuario en localStorage
             if (response && response.usuario) {
                 localStorage.setItem('currentUser', JSON.stringify(response.usuario));
+                
+                // Guardar token en cookie (para uso del middleware)
+                document.cookie = `authToken=${token}; path=/; max-age=86400; samesite=strict`;
+                
                 updateAuthUI();
             }
         } catch (error) {

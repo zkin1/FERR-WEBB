@@ -31,6 +31,13 @@
         }
     });
 
+    // Verificar si el usuario está autenticado
+    function isAuthenticated() {
+        const token = localStorage.getItem('userAuthToken');
+        const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        return token && Object.keys(userData).length > 0;
+    }
+
     // Función para cargar datos de la API
     async function fetchFromApi(endpoint) {
         try {
@@ -312,6 +319,18 @@
         
         if (addToCartBtn && quantityInput) {
             addToCartBtn.addEventListener('click', () => {
+                // Verificar si el usuario está autenticado
+                if (!isAuthenticated()) {
+                    showToast('Debes iniciar sesión para agregar productos al carrito', 'warning');
+                    
+                    // Redirigir al login después de un breve retraso
+                    setTimeout(() => {
+                        window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+                    }, 2000);
+                    
+                    return;
+                }
+                
                 const cantidad = parseInt(quantityInput.value);
                 
                 if (isNaN(cantidad) || cantidad < 1 || cantidad > maxStock) {
@@ -438,6 +457,18 @@
             // Agregar evento a botones de productos relacionados
             document.querySelectorAll('.btn-add-related').forEach(button => {
                 button.addEventListener('click', function() {
+                    // Verificar si el usuario está autenticado
+                    if (!isAuthenticated()) {
+                        showToast('Debes iniciar sesión para agregar productos al carrito', 'warning');
+                        
+                        // Redirigir al login después de un breve retraso
+                        setTimeout(() => {
+                            window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
                     const productData = {
                         id: this.dataset.id,
                         nombre: this.dataset.nombre,

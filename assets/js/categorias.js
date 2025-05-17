@@ -296,13 +296,6 @@ async function mostrarProductosCategoriaBootstrap(categoriaId) {
                         // Usar función de respaldo
                         addToCartFallback(productData);
                     }
-                    
-                    // Mostrar notificación - usar la función global si está disponible
-                    if (typeof window.showToast === 'function') {
-                        window.showToast('Producto agregado al carrito', 'success');
-                    } else {
-                        showToast('Producto agregado al carrito');
-                    }
                 });
             }
         });

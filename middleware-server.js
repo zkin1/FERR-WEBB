@@ -4,10 +4,13 @@ const cors = require('cors');
 const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const fetch = require('node-fetch');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Crear aplicación Express
 const app = express();
-const PORT = 3002; // Middleware en puerto 3002
+const PORT = process.env.PORT || 3002; // Middleware en puerto 3002
 
 // Middleware para registrar el tiempo de inicio de la solicitud
 app.use((req, res, next) => {
@@ -26,10 +29,41 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Agregar middleware para cookies
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'pages')));
+
+// Middleware para proteger rutas admin
+const protegerRutaAdmin = (req, res, next) => {
+  // Obtener token de cookie o encabezado
+  const token = req.cookies?.authToken || req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.redirect('/login.html?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+  
+  try {
+    // Verificar token usando la misma clave secreta que en tu API
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Verificar si es admin
+    if (decoded.rol !== 'admin') {
+      return res.status(403).sendFile(path.join(__dirname, 'pages', 'acceso-denegado.html'));
+    }
+    
+    // Agregar info del usuario al request
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error('Error verificando token:', error);
+    res.redirect('/login.html?redirect=' + encodeURIComponent(req.originalUrl));
+  }
+};
+
+// Aplicar el middleware a rutas admin - CORRECCIÓN AQUÍ
+app.use('/admin', protegerRutaAdmin);
 
 // Configurar proxy para la API de usuarios
 app.use('/api/usuarios', createProxyMiddleware({
@@ -85,6 +119,8 @@ app.use('/api/direcciones', createProxyMiddleware({
         res.status(503).json({ message: 'Servicio no disponible', error: err.message });
     }
 }));
+
+// El resto del código permanece igual...
 
 // Endpoint para verificar la API de usuarios
 app.get('/api/health', async (req, res) => {

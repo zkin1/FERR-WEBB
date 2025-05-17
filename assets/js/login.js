@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar si el usuario ya está autenticado
     if (localStorage.getItem('userAuthToken')) {
-        window.location.href = '/index.html'; // Redirigir a inicio si ya está autenticado
+        // Si hay un parámetro de redirección, ir ahí
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
+        } else {
+            window.location.href = '/index.html'; // Redirigir a inicio
+        }
         return;
     }
     
@@ -36,9 +42,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Llamar a la API
                 const response = await window.userApi.login(email, password);
                 
-                // Guardar token y datos del usuario
+                // Guardar token en localStorage
                 window.userApi.setToken(response.token);
                 localStorage.setItem('currentUser', JSON.stringify(response.usuario));
+                
+                // Guardar token en cookie (para uso del middleware)
+                document.cookie = `authToken=${response.token}; path=/; max-age=86400; samesite=strict`;
                 
                 // Mostrar mensaje de éxito
                 document.getElementById('success-message').textContent = 'Inicio de sesión exitoso. Redirigiendo...';

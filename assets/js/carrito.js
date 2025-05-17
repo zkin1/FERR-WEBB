@@ -1,14 +1,71 @@
 const CART_STORAGE_KEY = 'carrito';
+const USER_CART_PREFIX = 'user_cart_';
+const AUTH_TOKEN_KEY = 'userAuthToken';
+const USER_DATA_KEY = 'currentUser';
+
+// Variables globales
+let isInitialized = false;
+
+// Verificar si el usuario está autenticado
+function isAuthenticated() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
+    return token && Object.keys(userData).length > 0;
+}
+
+// Obtener ID del usuario actual
+function getCurrentUserId() {
+    try {
+        const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
+        return userData.id || userData.userId || null;
+    } catch (error) {
+        console.error('Error al obtener ID de usuario:', error);
+        return null;
+    }
+}
+
+// Generar clave de almacenamiento específica por usuario
+function getUserCartKey() {
+    const userId = getCurrentUserId();
+    return userId ? `${USER_CART_PREFIX}${userId}` : CART_STORAGE_KEY;
+}
 
 // Inicializar carrito
 function initCart() {
+    if (!isInitialized) {
+        console.log('Inicializando carrito...');
+        
+        // Configurar listener para cambios de autenticación
+        window.addEventListener('auth_state_changed', handleAuthChange);
+        
+        // Marcar como inicializado
+        isInitialized = true;
+    }
+    
     return getCartFromStorage();
+}
+
+// Manejar cambios en el estado de autenticación
+function handleAuthChange(event) {
+    console.log('Cambio en estado de autenticación detectado:', event.detail?.state);
+    
+    if (event.detail?.state === 'logout') {
+        // Limpiar el carrito en localStorage al cerrar sesión
+        localStorage.removeItem(CART_STORAGE_KEY);
+        updateCartCount();
+    } else if (event.detail?.state === 'login') {
+        // Cargar el carrito del usuario al iniciar sesión
+        updateCartCount();
+    }
 }
 
 // Obtener carrito desde localStorage
 function getCartFromStorage() {
     try {
-        const cartData = localStorage.getItem(CART_STORAGE_KEY);
+        // Determinar qué clave usar según si hay un usuario autenticado
+        const storageKey = getUserCartKey();
+        
+        const cartData = localStorage.getItem(storageKey);
         if (!cartData) {
             return { items: [], total: 0 };
         }
@@ -22,8 +79,11 @@ function getCartFromStorage() {
 // Guardar carrito en localStorage
 function saveCartToStorage(cart) {
     try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-        console.log('Carrito guardado en localStorage');
+        // Determinar qué clave usar según si hay un usuario autenticado
+        const storageKey = getUserCartKey();
+        
+        localStorage.setItem(storageKey, JSON.stringify(cart));
+        console.log('Carrito guardado en localStorage con clave:', storageKey);
     } catch (error) {
         console.error('Error al guardar carrito en localStorage:', error);
     }
@@ -31,7 +91,19 @@ function saveCartToStorage(cart) {
 
 // Añadir producto al carrito
 function addToCart(product) {
-    console.log('añadiendo al carrito:', product);
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+        showToast('Debes iniciar sesión para agregar productos al carrito', 'warning');
+        
+        // Redirigir al login después de un breve retraso
+        setTimeout(() => {
+            window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+        }, 2000);
+        
+        return null;
+    }
+    
+    console.log('Añadiendo al carrito para usuario:', getCurrentUserId(), product);
     
     // Obtener carrito actual
     let cart = getCartFromStorage();
@@ -71,6 +143,12 @@ function addToCart(product) {
 
 // Eliminar producto del carrito
 function removeFromCart(productId) {
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+        showToast('Debes iniciar sesión para modificar el carrito', 'warning');
+        return null;
+    }
+    
     // Obtener carrito actual
     let cart = getCartFromStorage();
     
@@ -94,6 +172,12 @@ function removeFromCart(productId) {
 
 // Actualizar cantidad de un producto
 function updateQuantity(productId, cantidad) {
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+        showToast('Debes iniciar sesión para modificar el carrito', 'warning');
+        return null;
+    }
+    
     if (cantidad <= 0) {
         return removeFromCart(productId);
     }
@@ -124,6 +208,12 @@ function updateQuantity(productId, cantidad) {
 
 // Vaciar carrito
 function clearCart() {
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+        showToast('Debes iniciar sesión para modificar el carrito', 'warning');
+        return null;
+    }
+    
     // Crear carrito vacío
     const emptyCart = { items: [], total: 0 };
     
@@ -144,11 +234,17 @@ function updateCartCount() {
     const cartCount = document.getElementById('cart-count');
     
     if (cartCount) {
-        let cart = getCartFromStorage();
-        // Calcular cantidad total de productos
-        const itemCount = cart.items.reduce((sum, item) => sum + (Number(item.cantidad) || 0), 0);
-        cartCount.textContent = itemCount;
-        console.log('Contador de carrito actualizado:', itemCount);
+        if (isAuthenticated()) {
+            // Si está autenticado, mostrar cantidad real
+            let cart = getCartFromStorage();
+            // Calcular cantidad total de productos
+            const itemCount = cart.items.reduce((sum, item) => sum + (Number(item.cantidad) || 0), 0);
+            cartCount.textContent = itemCount;
+            console.log('Contador de carrito actualizado:', itemCount);
+        } else {
+            // Si no está autenticado, mostrar 0
+            cartCount.textContent = '0';
+        }
     }
 }
 
@@ -157,6 +253,7 @@ function showToast(message, type = 'success') {
     // Verificar si Bootstrap está disponible
     if (typeof bootstrap === 'undefined') {
         console.warn('Bootstrap no está disponible para mostrar toast');
+        alert(message); // Fallback a alerta nativa
         return;
     }
     
@@ -221,6 +318,26 @@ function renderCart() {
     
     if (!cartContainer) {
         console.error('No se encontró el contenedor del carrito (cart-items)');
+        return;
+    }
+    
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+        cartContainer.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Debes iniciar sesión para ver tu carrito.
+                <div class="mt-3">
+                    <a href="/pages/login.html?redirect=/cart.html" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i> Iniciar sesión
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        if (cartTotalElement) cartTotalElement.textContent = '$0';
+        if (cartSubtotalElement) cartSubtotalElement.textContent = '$0';
+        
         return;
     }
     
@@ -420,9 +537,31 @@ function addCartEventListeners() {
     }
 }
 
+// Generar evento personalizado para notificar cambios de autenticación
+function notifyAuthChange(state) {
+    const event = new CustomEvent('auth_state_changed', {
+        detail: { state: state }
+    });
+    window.dispatchEvent(event);
+}
+
+// Integración con sistema de cierre de sesión existente
+// Monkey-patch del método logout para limpiar el carrito al cerrar sesión
+if (window.logout) {
+    const originalLogout = window.logout;
+    window.logout = function() {
+        // Notificar cambio de autenticación
+        notifyAuthChange('logout');
+        
+        // Llamar a la función original
+        return originalLogout.apply(this, arguments);
+    };
+    console.log('Función logout extendida para manejar carrito');
+}
+
 // Código a ejecutar cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM cargado - carrito.js simplificado');
+    console.log('DOM cargado - carrito.js con autenticación');
     
     // Asegurar que las funciones están disponibles globalmente
     window.addToCart = addToCart;
@@ -433,6 +572,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showToast = showToast;
     window.formatPrice = formatPrice;
     window.renderCart = renderCart;
+    
+    // Inicializar sistema de carrito
+    initCart();
     
     // Actualizar contador del carrito
     updateCartCount();
@@ -457,6 +599,22 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Estamos en la página del carrito, renderizando...');
         renderCart();
     }
+    
+    // Custom hook para login exitoso
+    // Esto es para sistemas que no disparan eventos al iniciar sesión
+    if (window.location.pathname.includes('login.html') && window.location.search.includes('success=true')) {
+        notifyAuthChange('login');
+    }
+});
+
+// Patching auth.js
+// Esto añade la notificación de cambio de autenticación a las funciones existentes
+document.addEventListener('login_success', function() {
+    notifyAuthChange('login');
+});
+
+document.addEventListener('logout_success', function() {
+    notifyAuthChange('logout');
 });
 
 // Función de diagnóstico - útil para depuración
@@ -464,14 +622,23 @@ function diagnoseCart() {
     console.log('======= DIAGNÓSTICO DEL CARRITO =======');
     
     try {
+        // Verificar estado de autenticación
+        const isLoggedIn = isAuthenticated();
+        console.log('Usuario autenticado:', isLoggedIn);
+        console.log('ID de usuario:', getCurrentUserId());
+        
         // Verificar si localStorage está disponible
         if (typeof localStorage === 'undefined') {
             console.error('localStorage no está disponible en este navegador');
             return;
         }
         
+        // Obtener clave específica del usuario
+        const userCartKey = getUserCartKey();
+        console.log('Clave de carrito:', userCartKey);
+        
         // Obtener datos brutos del carrito
-        const rawCartData = localStorage.getItem(CART_STORAGE_KEY);
+        const rawCartData = localStorage.getItem(userCartKey);
         console.log('Datos brutos del carrito:', rawCartData);
         
         // Intentar parsear los datos
@@ -532,6 +699,7 @@ window.showToast = showToast;
 window.formatPrice = formatPrice;
 window.renderCart = renderCart;
 window.diagnoseCart = diagnoseCart; // Función de utilidad para depuración
+window.notifyAuthChange = notifyAuthChange; // Para notificar cambios de autenticación
 
 // Confirmar que las funciones están disponibles globalmente
 console.log('carrito.js - Funciones globales definidas correctamente:');

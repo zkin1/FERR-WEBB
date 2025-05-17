@@ -247,7 +247,7 @@
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/index.html">
+                        <a class="nav-link active" href="/index.html">
                             <i class="fas fa-home me-1"></i> Inicio
                         </a>
                     </li>
@@ -265,7 +265,8 @@
                         </button>
                     </div>
                 </form>
-
+                
+                <!-- Botones de autenticación para usuarios no autenticados -->
                 <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
                     <a href="/pages/login.html" class="btn btn-outline-light me-2">
                         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
@@ -275,6 +276,7 @@
                     </a>
                 </div>
 
+                <!-- Menú para usuarios autenticados -->
                 <div class="user-dropdown dropdown ms-2 me-2" id="user-menu" style="display: none !important;">
                     <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
@@ -284,11 +286,11 @@
                         <li><a class="dropdown-item" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
                         <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/index.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button" onclick="logout(); setTimeout(function() { window.location.href = '/index.html'; }, 100);"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
                     </ul>
                 </div>
                 
-                <a href="/cart.html" class="btn btn-outline-light position-relative active">
+                <a href="/cart.html" class="btn btn-outline-light position-relative">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
                 </a>
