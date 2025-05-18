@@ -1,4 +1,12 @@
-const USER_API_URL = 'http://localhost:3003/api';
+const getBaseApiUrl = function() {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname; // Esto será 192.168.100.3 cuando accedas desde esa IP
+    const port = '3003'; // Mantener el puerto específico para la API de usuarios
+    
+    return `${protocol}//${hostname}:${port}/api`;
+};
+
+const USER_API_URL = getBaseApiUrl();
 
 class UserApiClient {
   constructor() {

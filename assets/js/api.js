@@ -1,14 +1,12 @@
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay configuración
+    // Usar la función de config.js para obtener la URL base
     if (window.APP_CONFIG) {
-        // Sobrescribir la configuración con la URL correcta
-        window.APP_CONFIG.API_URL = 'http://localhost:3000/api';
-        console.log('API URL sobrescrita en APP_CONFIG:', window.APP_CONFIG.API_URL);
+        // NO sobrescribir con localhost fijo
+        console.log('API URL en APP_CONFIG:', window.APP_CONFIG.API_URL);
     }
     
-    // Asegurar que usamos la URL correcta
-    API_URL = 'http://localhost:3000/api';
+    // Usar la URL dinámicamente configurada
+    API_URL = window.APP_CONFIG ? window.APP_CONFIG.API_URL : '/api';
     console.log('API URL final:', API_URL);
 });
 

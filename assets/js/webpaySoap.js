@@ -1,5 +1,13 @@
 // assets/js/webpaySoap.js
-const SOAP_SERVICE_URL = 'http://localhost:3002'; // URL base del servicio SOAP
+const getSoapServiceUrl = function() {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = '3002'; // Puerto del middleware
+    
+    return `${protocol}//${hostname}:${port}`;
+};
+
+const SOAP_SERVICE_URL = getSoapServiceUrl();
 
 // Función para iniciar una transacción de pago
 async function iniciarTransaccion(pedidoId, monto, urlRetorno) {

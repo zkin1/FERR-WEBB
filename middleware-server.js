@@ -408,9 +408,9 @@ app.use('/api/marcas', createProxyMiddleware({
 
 
 // Iniciar el servidor y los clientes SOAP
-app.listen(PORT, async () => {
-    console.log(`🚀 Middleware iniciado en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', async () => {
+    console.log(`🚀 Middleware iniciado en http://0.0.0.0:${PORT}`);
     await initSoapClients();
-    console.log(`📄 Frontend disponible en http://localhost:${PORT}`);
+    console.log(`📄 Frontend disponible en http://0.0.0.0:${PORT}`);
     console.log(`🔌 Proxy a API de usuarios configurado (puerto 3003)`);
 });
