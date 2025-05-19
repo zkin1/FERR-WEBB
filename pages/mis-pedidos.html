@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - FERREMAS</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    <link rel="stylesheet" href="/assets/css/styles.css"> 
+
+    <style>
+        .order-card {
+            transition: all 0.3s ease;
+        }
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+        }
+        .product-img-sm {
+            max-height: 80px;
+            max-width: 80px;
+            object-fit: contain;
+        }
+        .order-detail {
+            display: none;
+        }
+        .order-detail.active {
+            display: block;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            bottom: 0;
+            width: 2px;
+            background: #ccc;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #0d6efd;
+            border: 2px solid #fff;
+        }
+        .timeline-item.completed::before {
+            background: #2ecc71;
+        }
+        .timeline-item.current::before {
+            background: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
+        }
+        .timeline-item.pending::before {
+            background: #ccc;
+        }
+        .timeline-item.canceled::before {
+            background: #dc3545;
+        }
+        .empty-orders {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Verificación inicial de rol -->
+    <script>
+    // Función para obtener el rol del usuario actual
+    function getUserRole() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return userData.rol || 'guest';
+        } catch (e) {
+            console.error('Error al obtener rol de usuario:', e);
+            return 'guest';
+        }
+    }
+    
+    // Función para verificar si el usuario está autenticado
+    function isAuthenticated() {
+        return localStorage.getItem('userAuthToken') !== null;
+    }
+
+    // Redireccionar a login si no está autenticado
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!isAuthenticated()) {
+            window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        }
+    });
+    </script>
+
+    <!-- Header/Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/assets/images/logo.jpg" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default-logo.jpg'">
+                <span class="fw-bold">FERREMAS</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Menú común para todos los usuarios -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/categorias.html">
+                            <i class="fas fa-th-large me-1"></i> Categorías
+                        </a>
+                    </li>
+                    
+                    <!-- Menú para usuarios normales (cliente) -->
+                    <li class="nav-item user-only">
+                        <a class="nav-link active" href="/pages/mis-pedidos.html">
+                            <i class="fas fa-shopping-bag me-1"></i> Mis Pedidos
+                        </a>
+                    </li>
+                    
+                    <!-- Menú exclusivo para administradores -->
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/crud.html">
+                            <i class="fas fa-cog me-1"></i> Administración
+                        </a>
+                    </li>
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/inventario.html">
+                            <i class="fas fa-boxes me-1"></i> Inventario
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Menú para usuarios autenticados -->
+                <div class="user-dropdown dropdown ms-2 me-2" id="user-menu">
+                    <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item active" href="/pages/mis-pedidos.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/crud.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
+                <a href="/cart.html" class="btn btn-outline-light position-relative">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-3"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</h1>
+                <p class="text-muted">Consulta el historial y estado de tus pedidos realizados en nuestra tienda.</p>
+            </div>
+        </div>
+        
+        <!-- Filtros de pedidos -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <select class="form-select" id="filter-status">
+                                    <option value="todos">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="pagado">Pagado</option>
+                                    <option value="procesando">Procesando</option>
+                                    <option value="enviado">Enviado</option>
+                                    <option value="entregado">Entregado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filter-date">
+                                    <option value="todos">Todas las fechas</option>
+                                    <option value="7">Últimos 7 días</option>
+                                    <option value="30">Últimos 30 días</option>
+                                    <option value="90">Últimos 3 meses</option>
+                                    <option value="180">Últimos 6 meses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="search-order" placeholder="Buscar por Nº pedido...">
+                                    <button class="btn btn-outline-secondary" type="button" id="btn-search-order">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" id="btn-refresh-orders">
+                                    <i class="fas fa-sync-alt me-2"></i>Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador de carga -->
+        <div id="loading-indicator" class="text-center my-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando tus pedidos...</p>
+        </div>
+        
+        <!-- Contenedor de pedidos -->
+        <div id="orders-container">
+            <!-- Aquí se cargarán dinámicamente los pedidos -->
+        </div>
+        
+        <!-- Paginación -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Navegación de pedidos">
+                    <ul class="pagination justify-content-center" id="pagination-container"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalles del pedido -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailModalLabel">Detalles del Pedido #12345</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="order-detail-content">
+                    <!-- El contenido se cargará dinámicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>Enlaces</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Dirección: Av. Principal 123, Santiago</p>
+                    <p><i class="fas fa-phone me-2"></i> Teléfono: +56 2 2345 6789</p>
+                    <p><i class="fas fa-envelope me-2"></i> Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contenedor para toasts -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Implementación fallback de pedidosSoap directamente en el HTML -->
+    <script>
+    // Script incrustado de pedidosSoap para garantizar disponibilidad
+    (function() {
+        const getSoapServiceUrl = function() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = '3002'; // Puerto del middleware
+            return `${protocol}//${hostname}:${port}`;
+        };
+
+        const SOAP_SERVICE_URL = getSoapServiceUrl();
+        console.log('URL del servicio SOAP:', SOAP_SERVICE_URL);
+
+        // Función auxiliar para realizar solicitudes al middleware SOAP
+        async function callSoapService(endpoint, method, params = {}) {
+            try {
+                console.log(`Llamando a ${SOAP_SERVICE_URL}/api/soap/${endpoint}/${method} con parámetros:`, params);
+                
+                const response = await fetch(`${SOAP_SERVICE_URL}/api/soap/${endpoint}/${method}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error llamando al servicio SOAP (${endpoint}/${method}):`, error);
+                throw error;
+            }
+        }
+
+        // Obtener todos los pedidos del usuario actual
+        async function getPedidosUsuario(usuarioId, filtros = {}) {
+            try {
+                console.log('getPedidosUsuario llamado con userId:', usuarioId, 'filtros:', filtros);
+                
+                // Si estamos en desarrollo y falla la conexión, usar datos de ejemplo
+                const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                
+                try {
+                    const params = {
+                        usuarioId: parseInt(usuarioId),
+                        pagina: filtros.pagina || 1,
+                        limite: filtros.limite || 10,
+                        estado: filtros.estado || '',
+                        fechaDesde: filtros.fechaDesde || '',
+                        fechaHasta: filtros.fechaHasta || '',
+                        buscar: filtros.buscar || ''
+                    };
+                    
+                    const result = await callSoapService('pedidos', 'GetPedidosByUsuario', params);
+                    
+                    // Procesar resultado para formato consistente
+                    return procesarResultadoPedidos(result);
+                } catch (error) {
+                    if (isDev) {
+                        console.warn('Error al obtener pedidos del usuario. Usando datos de ejemplo:', error);
+                        // Devolver datos de ejemplo en desarrollo
+                        return getExampleOrders();
+                    }
+                    throw error;
+                }
+            } catch (error) {
+                console.error('Error al obtener pedidos del usuario:', error);
+                return { 
+                    pedidos: [], 
+                    pagination: {
+                        page: filtros.pagina || 1,
+                        limit: filtros.limite || 10,
+                        totalItems: 0,
+                        totalPages: 0
+                    }
+                };
+            }
+        }
+        
+        // Datos de ejemplo para desarrollo
+        function getExampleOrders() {
+            const fechaActual = new Date();
+            const fechaAnterior1 = new Date();
+            fechaAnterior1.setDate(fechaAnterior1.getDate() - 5);
+            const fechaAnterior2 = new Date();
+            fechaAnterior2.setDate(fechaAnterior2.getDate() - 15);
+            
+            return {
+                pedidos: [
+                    {
+                        id: 12345,
+                        fecha_creacion: fechaActual.toISOString(),
+                        estado: 'pendiente',
+                        items: [
+                            { id: 1, producto_id: 1, nombre: 'Martillo Profesional', codigo: 'MART001', precio: 12990, cantidad: 1 },
+                            { id: 2, producto_id: 3, nombre: 'Sierra Circular', codigo: 'SIER001', precio: 89990, cantidad: 1 }
+                        ],
+                        direccion_envio: 'Av. Principal 123, Santiago',
+                        ciudad: 'Santiago',
+                        total: 102980,
+                        subtotal: 102980,
+                        envio: 0,
+                        metodo_pago: 'WebPay',
+                        estado_pago: 'Pendiente',
+                        metodo_envio: 'Estándar'
+                    },
+                    {
+                        id: 12344,
+                        fecha_creacion: fechaAnterior1.toISOString(),
+                        fecha_pago: fechaAnterior1.toISOString(),
+                        estado: 'pagado',
+                        items: [
+                            { id: 3, producto_id: 2, nombre: 'Destornillador Eléctrico', codigo: 'DEST001', precio: 19990, cantidad: 2 }
+                        ],
+                        direccion_envio: 'Calle Secundaria 456, Santiago',
+                        ciudad: 'Santiago',
+                        total: 39980,
+                        subtotal: 39980,
+                        envio: 0,
+                        metodo_pago: 'WebPay',
+                        estado_pago: 'Pagado',
+                        codigo_autorizacion: '123456',
+                        metodo_envio: 'Express'
+                    },
+                    {
+                        id: 12343,
+                        fecha_creacion: fechaAnterior2.toISOString(),
+                        fecha_pago: fechaAnterior2.toISOString(),
+                        fecha_procesamiento: new Date(fechaAnterior2.getTime() + 86400000).toISOString(),
+                        fecha_envio: new Date(fechaAnterior2.getTime() + 172800000).toISOString(),
+                        fecha_entrega: new Date(fechaAnterior2.getTime() + 432000000).toISOString(),
+                        estado: 'entregado',
+                        items: [
+                            { id: 4, producto_id: 4, nombre: 'Cemento 25kg', codigo: 'CEM001', precio: 5990, cantidad: 3 }
+                        ],
+                        direccion_envio: 'Av. Principal 123, Santiago',
+                        ciudad: 'Santiago',
+                        total: 17970,
+                        subtotal: 17970,
+                        envio: 0,
+                        metodo_pago: 'WebPay',
+                        estado_pago: 'Pagado',
+                        codigo_autorizacion: '654321',
+                        metodo_envio: 'Estándar',
+                        numero_seguimiento: 'TRACK123456789'
+                    }
+                ],
+                pagination: {
+                    page: 1,
+                    limit: 10,
+                    totalItems: 3,
+                    totalPages: 1
+                }
+            };
+        }
+
+        // Obtener un pedido específico por ID
+        async function getPedidoById(pedidoId) {
+            try {
+                const result = await callSoapService('pedidos', 'GetPedidoById', { 
+                    pedidoId: parseInt(pedidoId) 
+                });
+                
+                // Transformar el resultado al formato esperado
+                return procesarPedidoIndividual(result.pedido);
+            } catch (error) {
+                console.error(`Error al obtener pedido #${pedidoId}:`, error);
+                return null;
+            }
+        }
+
+        // Cancelar un pedido
+        async function cancelarPedido(pedidoId, motivo) {
+            try {
+                const result = await callSoapService('pedidos', 'CancelarPedido', {
+                    pedidoId: parseInt(pedidoId),
+                    motivo: motivo || 'Cancelado por el cliente'
+                });
+                
+                return {
+                    success: result.exito,
+                    message: result.mensaje
+                };
+            } catch (error) {
+                console.error(`Error al cancelar pedido #${pedidoId}:`, error);
+                return { 
+                    success: false, 
+                    message: error.message 
+                };
+            }
+        }
+
+        // Confirmar entrega de un pedido
+        async function confirmarEntrega(pedidoId) {
+            try {
+                const result = await callSoapService('pedidos', 'ConfirmarEntrega', {
+                    pedidoId: parseInt(pedidoId)
+                });
+                
+                return {
+                    success: result.exito,
+                    message: result.mensaje
+                };
+            } catch (error) {
+                console.error(`Error al confirmar entrega del pedido #${pedidoId}:`, error);
+                return { 
+                    success: false, 
+                    message: error.message 
+                };
+            }
+        }
+
+        // Obtener estado de un pedido
+        async function getEstadoPedido(pedidoId) {
+            try {
+                const result = await callSoapService('pedidos', 'GetEstadoPedido', {
+                    pedidoId: parseInt(pedidoId)
+                });
+                
+                return {
+                    estado: result.estado,
+                    fecha_actualizacion: result.fechaActualizacion
+                };
+            } catch (error) {
+                console.error(`Error al obtener estado del pedido #${pedidoId}:`, error);
+                return { 
+                    estado: 'desconocido',
+                    fecha_actualizacion: new Date().toISOString()
+                };
+            }
+        }
+
+        // Función para procesar el resultado de múltiples pedidos
+        function procesarResultadoPedidos(result) {
+            try {
+                let pedidos = [];
+                
+                // Manejar diferentes formatos de respuesta SOAP
+                if (result.pedidos) {
+                    if (Array.isArray(result.pedidos.pedido)) {
+                        pedidos = result.pedidos.pedido.map(p => procesarPedidoIndividual(p));
+                    } else if (result.pedidos.pedido) {
+                        pedidos = [procesarPedidoIndividual(result.pedidos.pedido)];
+                    }
+                }
+                
+                return {
+                    pedidos: pedidos,
+                    pagination: {
+                        page: parseInt(result.paginacion?.pagina || 1),
+                        limit: parseInt(result.paginacion?.limite || 10),
+                        totalItems: parseInt(result.paginacion?.totalItems || 0),
+                        totalPages: parseInt(result.paginacion?.totalPages || 0)
+                    }
+                };
+            } catch (error) {
+                console.error('Error al procesar resultados de pedidos:', error);
+                return { pedidos: [], pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 0 } };
+            }
+        }
+
+        // Función para procesar un pedido individual
+        function procesarPedidoIndividual(pedido) {
+            if (!pedido) return null;
+            
+            // Procesar items del pedido
+            let items = [];
+            if (pedido.items) {
+                if (Array.isArray(pedido.items.item)) {
+                    items = pedido.items.item;
+                } else if (pedido.items.item) {
+                    items = [pedido.items.item];
+                }
+            }
+            
+            // Adaptar nomenclatura de campos (camelCase a snake_case)
+            const pedidoProcesado = {
+                id: parseInt(pedido.id),
+                fecha_creacion: pedido.fechaCreacion,
+                fecha_pago: pedido.fechaPago,
+                fecha_procesamiento: pedido.fechaProcesamiento,
+                fecha_envio: pedido.fechaEnvio,
+                fecha_entrega: pedido.fechaEntrega,
+                fecha_cancelacion: pedido.fechaCancelacion,
+                estado: pedido.estado,
+                estado_pago: pedido.estadoPago,
+                metodo_pago: pedido.metodoPago,
+                codigo_autorizacion: pedido.codigoAutorizacion,
+                total: parseFloat(pedido.total),
+                subtotal: parseFloat(pedido.subtotal),
+                envio: parseFloat(pedido.envio || 0),
+                descuento: parseFloat(pedido.descuento || 0),
+                direccion_envio: pedido.direccionEnvio,
+                ciudad: pedido.ciudad,
+                metodo_envio: pedido.metodoEnvio,
+                numero_seguimiento: pedido.numeroSeguimiento,
+                motivo_cancelacion: pedido.motivoCancelacion,
+                items: items.map(item => ({
+                    id: parseInt(item.id),
+                    producto_id: parseInt(item.productoId),
+                    nombre: item.nombre,
+                    codigo: item.codigo,
+                    precio: parseFloat(item.precio),
+                    cantidad: parseInt(item.cantidad)
+                }))
+            };
+            
+            return pedidoProcesado;
+        }
+
+        // Exportar todas las funciones
+        window.pedidosSoap = {
+            getPedidosUsuario,
+            getPedidoById,
+            cancelarPedido,
+            confirmarEntrega,
+            getEstadoPedido,
+            callSoapService
+        };
+        
+        console.log('pedidosSoap inicializado correctamente');
+    })();
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts del sitio -->
+    <script src="/assets/js/network-fix.js"></script>
+    <script src="/assets/js/global-url-fix.js"></script>
+    <script src="/assets/js/fix-logout-loop.js"></script>
+    <script src="/assets/js/config.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/userApi.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/carrito.js"></script>
+    <script src="/assets/js/headerAuth.js"></script>
+    <script src="/assets/js/inventarioSoap.js"></script>
+    <script src="/assets/js/aprobacionSoap.js"></script>
+    <script src="/assets/js/pedidos.js"></script>
+</body>
+</html>
