@@ -858,7 +858,6 @@ function debugBotones() {
     console.log('=== FIN DEBUGGER DE BOTONES ===');
 }
 
-// Patching auth.js
 // Esto añade la notificación de cambio de autenticación a las funciones existentes
 document.addEventListener('login_success', function() {
     notifyAuthChange('login');

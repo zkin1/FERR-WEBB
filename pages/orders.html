@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - FERREMAS</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="/assets/css/custom-bootstrap.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+    <!-- Estilos específicos para pedidos -->
+    <style>
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-pendiente { background-color: #ffc107; color: #000; }
+        .status-pagado { background-color: #17a2b8; color: #fff; }
+        .status-preparando { background-color: #6f42c1; color: #fff; }
+        .status-enviado { background-color: #007bff; color: #fff; }
+        .status-entregado { background-color: #28a745; color: #fff; }
+        .status-cancelado { background-color: #dc3545; color: #fff; }
+        
+        .order-card {
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .order-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .order-details {
+            display: none;
+        }
+        .order-details.show {
+            display: block;
+        }
+        #filterControls {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Verificación inicial de rol -->
+    <script>
+    // Función para obtener el rol del usuario actual
+    function getUserRole() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return userData.rol || 'guest';
+        } catch (e) {
+            console.error('Error al obtener rol de usuario:', e);
+            return 'guest';
+        }
+    }
+    
+    // Función para verificar si el usuario está autenticado
+    function isAuthenticated() {
+        return localStorage.getItem('userAuthToken') !== null;
+    }
+    </script>
+
+    <!-- Header/Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/assets/images/logo.jpg" alt="FERREMAS" height="40" class="me-2" onerror="this.src='/assets/images/default-logo.jpg'">
+                <span class="fw-bold">FERREMAS</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-expanded="false" aria-label="Navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Menú común para todos los usuarios -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/categorias.html">
+                            <i class="fas fa-th-large me-1"></i> Categorías
+                        </a>
+                    </li>
+                    
+                    <!-- Menú exclusivo para administradores -->
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/crud.html">
+                            <i class="fas fa-cog me-1"></i> Administración
+                        </a>
+                    </li>
+                    <li class="nav-item admin-only" style="display: none;">
+                        <a class="nav-link" href="/admin/inventario.html">
+                            <i class="fas fa-boxes me-1"></i> Inventario
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Formulario de búsqueda -->
+                <form class="d-flex me-2">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Botones de autenticación para usuarios no autenticados -->
+                <div class="auth-buttons d-flex align-items-center ms-2 me-2" id="auth-buttons">
+                    <a href="/pages/login.html" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="/pages/register.html" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                </div>
+
+                <!-- Menú para usuarios autenticados -->
+                <div class="user-dropdown dropdown ms-2 me-2" id="user-menu" style="display: none !important;">
+                    <a class="btn btn-light dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="username-display">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/pages/profile.html"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item active" href="/pages/orders.html"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</a></li>
+                        <li id="admin-menu-item" style="display: none;"><a class="dropdown-item text-primary" href="/admin/crud.html"><i class="fas fa-cog me-2"></i>Administración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
+                <a href="/cart.html" class="btn btn-outline-light position-relative">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal - Gestión de Pedidos -->
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-3">Mis Pedidos</h1>
+                <p class="text-muted">Consulta y administra tus pedidos en FERREMAS</p>
+            </div>
+            <div class="col-md-4 d-flex justify-content-md-end align-items-center">
+                <button id="testConnection" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-plug me-1"></i> Probar API
+                </button>
+                <button id="testFullOrder" class="btn btn-outline-secondary">
+                    <i class="fas fa-tasks me-1"></i> Verificar Datos
+                </button>
+            </div>
+        </div>
+
+        <!-- Estado de la conexión -->
+        <div class="alert alert-info d-flex align-items-center mb-4" id="connectionStatus">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            <div>
+                <strong>Estado API:</strong> <span id="apiStatusText">Verificando conexión...</span>
+            </div>
+        </div>
+
+        <!-- Filtros de búsqueda -->
+        <div id="filterControls" class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Buscar pedidos</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="filterType" class="form-label">Tipo de filtro:</label>
+                        <select id="filterType" class="form-select">
+                            <option value="usuario">Mis pedidos</option>
+                            <option value="estado" class="admin-only">Por estado</option>
+                            <option value="numero">Por número de pedido</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4" id="usuarioFilterDiv">
+                        <label for="usuarioId" class="form-label">ID de usuario:</label>
+                        <input type="number" id="usuarioId" class="form-control" value="1" readonly>
+                    </div>
+                    
+                    <div class="col-md-4" id="estadoFilterDiv" style="display:none;">
+                        <label for="estadoPedido" class="form-label">Estado:</label>
+                        <select id="estadoPedido" class="form-select">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="preparando">Preparando</option>
+                            <option value="enviado">Enviado</option>
+                            <option value="entregado">Entregado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4" id="numeroFilterDiv" style="display:none;">
+                        <label for="numeroPedido" class="form-label">Número de pedido:</label>
+                        <input type="text" id="numeroPedido" class="form-control" placeholder="Ej: PED-250512-0001">
+                    </div>
+                    
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button id="btnBuscar" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas para mostrar mensajes -->
+        <div class="alert alert-info" role="alert" id="loadingMsg">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                <span>Cargando tus pedidos...</span>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning" role="alert" id="noOrdersMsg" style="display:none;">
+            <i class="fas fa-exclamation-triangle me-2"></i> No se encontraron pedidos con los criterios especificados.
+        </div>
+        
+        <div class="alert alert-danger" role="alert" id="errorMsg" style="display:none;">
+            <i class="fas fa-times-circle me-2"></i> Ha ocurrido un error al cargar los pedidos. Por favor, intente nuevamente.
+        </div>
+
+        <!-- Contenedor de pedidos -->
+        <div id="ordersContainer"></div>
+    </div>
+
+    <!-- Modal para cambiar estado (solo admin) -->
+    <div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="changeStatusModalLabel">Cambiar Estado del Pedido</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modalOrderId">
+                    <input type="hidden" id="modalOrderNumber">
+                    
+                    <div class="mb-3">
+                        <label for="modalCurrentStatus" class="form-label">Estado actual:</label>
+                        <input type="text" id="modalCurrentStatus" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="modalNewStatus" class="form-label">Nuevo Estado:</label>
+                        <select id="modalNewStatus" class="form-select">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="preparando">Preparando</option>
+                            <option value="enviado">Enviado</option>
+                            <option value="entregado">Entregado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="modalComment" class="form-label">Comentario (opcional):</label>
+                        <textarea id="modalComment" class="form-control" rows="3" placeholder="Agregar un comentario sobre el cambio de estado..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveStatus">
+                        <i class="fas fa-save me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para toasts -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>FERREMAS</h3>
+                    <p>Desde 1980 ofreciendo los mejores productos para la construcción y ferretería.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h3>Enlaces</h3>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/pages/categorias.html" class="text-white text-decoration-none">Categorías</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Dirección: Av. Principal 123, Santiago</p>
+                    <p><i class="fas fa-phone me-2"></i> Teléfono: +56 2 2345 6789</p>
+                    <p><i class="fas fa-envelope me-2"></i> Email: info@ferremas.cl</p>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
+                <p>&copy; 2025 FERREMAS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts básicos del sitio -->
+    <script src="/assets/js/network-fix.js"></script>
+    <script src="/assets/js/global-url-fix.js"></script>
+    <script src="/assets/js/fix-logout-loop.js"></script>
+    <script src="/assets/js/config.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/userApi.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/carrito.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/headerAuth.js"></script>
+
+    <!-- Scripts específicos para pedidos -->
+    <script src="/assets/js/pedidoApi.js"></script>
+    <script src="/assets/js/orders.js"></script>
+</body>
+</html>

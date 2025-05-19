@@ -8,18 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Parámetros de URL:', { redirect, success });
 
-    // *** MEJORA: Manejo más robusto de la redirección ***
+    
     if (success === 'true' && redirect) {
         console.log('Redireccionando a:', decodeURIComponent(redirect));
         
         // Limpiar la URL actual (remover parámetros)
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // *** MODIFICACIÓN: Verificar autenticación con ambos tokens posibles ***
+        
         const isAuthed = !!localStorage.getItem('userAuthToken') || !!localStorage.getItem('auth_token');
         
         if (isAuthed) {
-            // *** MEJORA: Sincronizar los tokens ***
+            
             sincronizarTokens();
             
             // Pequeño retraso para asegurar que todo esté listo
@@ -48,13 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
         verificarAccesoAdmin();
     }
     
-    // *** NUEVO: Verificar si estamos en checkout para asegurar autenticación ***
+    
     if (window.location.pathname.includes('checkout.html')) {
         handleCheckoutAuth();
     }
 });
 
-// *** NUEVA FUNCIÓN: Sincronizar tokens entre diferentes nombres ***
+
 function sincronizarTokens() {
     const userAuthToken = localStorage.getItem('userAuthToken');
     const authToken = localStorage.getItem('auth_token');
@@ -66,7 +66,6 @@ function sincronizarTokens() {
     }
 }
 
-// *** NUEVA FUNCIÓN: Manejar autenticación específica para checkout ***
 function handleCheckoutAuth() {
     console.log('Verificando autenticación para checkout...');
     
@@ -133,8 +132,7 @@ function updateAuthUI() {
     if (authElements.length === 0 || userElements.length === 0) {
         console.warn('No se encontraron todos los elementos de autenticación en la página');
     }
-    
-    // *** MEJORA: Verificar ambos tokens posibles ***
+
     const token = localStorage.getItem('userAuthToken') || localStorage.getItem('auth_token');
     const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const isAuthenticated = token && Object.keys(userData).length > 0;
@@ -213,7 +211,6 @@ function updateAuthUI() {
 
 // Nueva función para verificar acceso admin
 function verificarAccesoAdmin() {
-    // *** MEJORA: Verificar ambos tokens posibles ***
     const token = localStorage.getItem('userAuthToken') || localStorage.getItem('auth_token');
     const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
@@ -270,7 +267,7 @@ function limitarModulosAdmin() {
 
 // Función para validar sesión activa
 async function validateSession() {
-    // *** MEJORA: Verificar ambos tokens posibles ***
+
     const token = localStorage.getItem('userAuthToken') || localStorage.getItem('auth_token');
     
     if (token && window.userApi) {
@@ -293,7 +290,6 @@ async function validateSession() {
             if (response && response.usuario) {
                 localStorage.setItem('currentUser', JSON.stringify(response.usuario));
                 
-                // *** MEJORA: Guardar token en ambos formatos para compatibilidad ***
                 localStorage.setItem('userAuthToken', token);
                 localStorage.setItem('auth_token', token);
                 
@@ -326,7 +322,6 @@ function handleLoginRedirection() {
     if (redirect) {
         console.log('Detectada redirección a:', decodeURIComponent(redirect));
         
-        // *** MEJORA: Verificar ambos tokens posibles ***
         const token = localStorage.getItem('userAuthToken') || localStorage.getItem('auth_token');
         const userData = JSON.parse(localStorage.getItem('currentUser') || '{}');
         const isAuthenticated = token && Object.keys(userData).length > 0;
@@ -355,7 +350,6 @@ function enhancedLogin(email, password) {
     // Usar la API de usuario existente
     window.userApi.login(email, password)
         .then(response => {
-            // *** MEJORA: Guardar token en ambos formatos para compatibilidad ***
             window.userApi.setToken(response.token);
             localStorage.setItem('userAuthToken', response.token);
             localStorage.setItem('auth_token', response.token);
@@ -369,7 +363,6 @@ function enhancedLogin(email, password) {
                 showToast('Login exitoso', 'success');
             }
             
-            // *** MEJORA: Manejar explícitamente redirección a checkout ***
             setTimeout(() => {
                 if (redirect) {
                     // Si estamos redirigiendo a checkout, añadir parámetro de éxito
