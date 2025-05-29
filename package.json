@@ -12,13 +12,23 @@
   },
   "name": "ferr-webb",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000F\u0000E\u0000R\u0000R\u0000-\u0000W\u0000E\u0000B\u0000B\u0000\r\u0000 \u0000",
+  "description": "Ferremas E-commerce Web Application",
   "main": "middleware-server.js",
   "scripts": {
     "start": "node middleware-server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
-  "keywords": [],
+  "keywords": ["ecommerce", "ferremas", "express", "soap"],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true,
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+  }
 }

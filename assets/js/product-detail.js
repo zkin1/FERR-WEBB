@@ -371,8 +371,7 @@ async function getProductStock(productId) {
                         cart.push(productData);
                     }
                     
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    showToast('¡Producto agregado al carrito!');
+
                     
                     // Actualizar contador del carrito si existe
                     const cartCountElement = document.getElementById('cart-count');
@@ -483,7 +482,6 @@ async function getProductStock(productId) {
                     
                     if (typeof window.addToCart === 'function') {
                         window.addToCart(productData);
-                        showToast('¡Producto agregado al carrito!');
                     } else {
                         // Implementación mínima alternativa
                         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -496,7 +494,6 @@ async function getProductStock(productId) {
                         }
                         
                         localStorage.setItem('cart', JSON.stringify(cart));
-                        showToast('¡Producto agregado al carrito!');
                         
                         // Actualizar contador
                         const cartCountElement = document.getElementById('cart-count');
