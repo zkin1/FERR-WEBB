@@ -1,0 +1,6 @@
+Label,# Samples,Average,Min,Max,Std. Dev.,Error %,Throughput,Received KB/sec,Sent KB/sec,Avg. Bytes
+Generar Email Único,1,4,4,4,0.00,0.000%,250.00000,92.77,42.48,380.0
+POST - Registro Usuario,1,5,5,5,0.00,100.000%,200.00000,69.92,60.55,358.0
+POST - Login Usuario Registrado,1,85,85,85,0.00,0.000%,11.76471,13.47,3.17,1172.0
+POST - Login Credenciales Inválidas,1,5,5,5,0.00,100.000%,200.00000,69.14,56.25,354.0
+TOTAL,4,24,4,85,34.79,50.000%,43.47826,24.03,11.12,566.0

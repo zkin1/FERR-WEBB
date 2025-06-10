@@ -1,0 +1,5 @@
+Label,# Samples,Average,Min,Max,Std. Dev.,Error %,Throughput,Received KB/sec,Sent KB/sec,Avg. Bytes
+GET - Obtener Todos los Productos,5,5,4,9,1.85,0.000%,3.11915,11.45,0.44,3760.0
+GET - Buscar Productos por Término,3,5,5,6,0.47,0.000%,4.45765,4.59,0.71,1054.0
+POST - Crear Nuevo Producto,3,13,13,15,0.94,0.000%,4.39883,2.24,2.04,522.0
+TOTAL,11,7,4,15,3.89,0.000%,6.86213,14.33,1.61,2138.9

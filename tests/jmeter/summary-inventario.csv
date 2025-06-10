@@ -1,0 +1,7 @@
+Label,# Samples,Average,Min,Max,Std. Dev.,Error %,Throughput,Received KB/sec,Sent KB/sec,Avg. Bytes
+✅ Test 1.1 - GetAllUbicaciones,1,5,5,5,0.00,100.000%,200.00000,145.90,81.05,747.0
+✅ Test 1.2 - GetUbicacionById (ID=1),1,4,4,4,0.00,0.000%,250.00000,175.29,118.16,718.0
+✅ Test 2.1 - GetAllStock (Paginado),1,13,13,13,0.00,100.000%,76.92308,74.14,36.43,987.0
+✅ Test 1.3 - CreateUbicacion (Código único),1,15,15,15,0.00,100.000%,66.66667,35.09,43.16,539.0
+✅ Test 2.2 - GetStockByProducto (ID=1),1,16,16,16,0.00,0.000%,62.50000,58.53,30.15,959.0
+TOTAL,5,10,4,16,5.08,60.000%,172.41379,133.01,85.57,790.0
