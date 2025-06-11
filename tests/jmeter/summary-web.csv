@@ -1,0 +1,6 @@
+Label,# Samples,Average,Min,Max,Std. Dev.,Error %,Throughput,Received KB/sec,Sent KB/sec,Avg. Bytes
+GET - Index FERREMAS,1,68,68,68,0.00,0.000%,14.70588,428.68,1.81,29850.0
+GET - API Productos Destacados,1,5,5,5,0.00,0.000%,200.00000,519.14,40.23,2658.0
+GET - Página Login,1,4,4,4,0.00,0.000%,250.00000,2595.46,32.23,10631.0
+GET - API Categorías,1,3,3,3,0.00,0.000%,333.33333,508.46,50.78,1562.0
+TOTAL,4,20,3,68,27.72,0.000%,42.10526,459.51,6.37,11175.2
